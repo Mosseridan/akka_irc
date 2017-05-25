@@ -1,14 +1,5 @@
 import Shared.Messages.*;
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-
-import java.util.concurrent.TimeUnit;
+import akka.actor.*;
 
 public class ServerUserActor extends AbstractActor {
 
@@ -16,109 +7,100 @@ public class ServerUserActor extends AbstractActor {
 
     String userName;
     ActorRef clientUserActor;
-    String actorsPath = "akka.tcp://IRC_akka@127.0.0.1:3553/user/";
-    String clientUser = "ClientUser";
-    ActorSelection channelCreatorSel;
-    final int joinChannelTimeoutSeconds = 3;
+    final String serverUserPath = "/user/Server/ServerUser";
+    final String channelCreatorPath = "/user/Server/ChannelCreator";
+
+    public ServerUserActor(String username) {
+        this.userName = username;
+    }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(OutgoingPrivateMessage.class, txtMsg -> { // send a message to another actor
+                    ActorSelection serverActorSel = getContext().actorSelection(serverUserPath + txtMsg.sendTo);
+                    ActorRef serverUserActor = HelperFunctions.getActorRefBySelection(serverActorSel);
 
+                    if (serverUserActor != null) {
 
+                        IncomingPrivateMessage incomingTxtMsg = new IncomingPrivateMessage();
+                        incomingTxtMsg.sentFrom = userName;
+                        incomingTxtMsg.text = txtMsg.text;
 
-                .match(OutgoingTextMessage.class, txtMsg -> { // send a message to another actor
-                    ActorSelection serverActorSel = getContext().actorSelection("ServerUser" + txtMsg.sendTo);
-                    ActorRef serverActor = HelperFunctions.getActorRefBySelection(serverActorSel);
-                    IncomingTextMessage incomingTxtMsg = new IncomingTextMessage();
-                    incomingTxtMsg.sentFrom = userName;
-                    incomingTxtMsg.text = txtMsg.text;
-
-                    serverActor.tell(incomingTxtMsg, self());
+                        serverUserActor.tell(incomingTxtMsg, self());
+                    } else {
+                        tellClientSystem("User " +  txtMsg.sendTo + " does not exist");
+                    }
                 })
-                .match(IncomingTextMessage.class, txtMsg -> { // A Private message from another user
-                    // Show PM in UI
-                    // clientUserActor
+                .match(IncomingPrivateMessage.class, incTxtMsg -> {
+                    tellClient("{" + incTxtMsg.sentFrom + "}: "+ incTxtMsg.text);
+                })
 
-                })
-                .match(IncomingBroadcastTextMessage.class, incBrdTxtMsg -> { // Broadcast from another user
-                    // Show Broadcast in UI
-                    // clientUserActor
-                })
                 .match(JoinMessage.class, joinMsg -> {
-                    ActorRef channelCreator = HelperFunctions.getActorRefBySelection(channelCreatorSel);
 
-                    final Timeout timeout = new Timeout(Duration.create(1, TimeUnit.SECONDS));
-                    Future<Object> future = Patterns.ask(channelCreator, joinMsg, timeout);
-                    try {
-                        JoinApprovalMessage msg = (JoinApprovalMessage) Await.result(future, timeout.duration());
-                        if (msg.approved) {
-                            // tell the client
+                    // get child by channel name
+                    ActorSelection sel = getContext().actorSelection(joinMsg.channelName);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-                            msg.mode
-                        } else {
-                            // also tell the client
-                        }
-
-                    } catch (Exception e) {
-
+                    // create the child if it doesn't exist
+                    if (userChannel == null)  {
+                        userChannel = getContext().actorOf(Props.create(ServerUserChannelActor.class, userName, joinMsg.channelName, clientUserActor), joinMsg.channelName);
                     }
 
-
-                })
-                .match(JoinApprovalMessage.class, joinAppMsg -> {
-                    ActorSelection userActorSel = getContext().getSystem().actorSelection(clientUser + userName);
-                    ActorRef clientUser = HelperFunctions.getActorRefBySelection(userActorSel);
-                    clientUser.tell(joinAppMsg, self());
-
+                    // try joining the channel
+                    userChannel.forward(joinMsg, getContext());
                 })
                 .match(LeaveChannelMessage.class, leaveChMsg -> {
-                    ActorSelection sel = getContext().actorSelection("/user/ChannelCreator/" + leaveChMsg.channelToLeave);
-                    ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
+                    ActorSelection sel = getContext().actorSelection(leaveChMsg.channelToLeave);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-                    channel.tell(leaveChMsg, self());
+                    leaveChMsg.leavingUserName = userName;
+                    userChannel.forward(leaveChMsg, getContext());
                 })
-                .match(BroadcastMessage.class, brdMsg -> {
-                    ActorSelection sel = getContext().actorSelection("/user/ChannelCreator/" + brdMsg.toChannel);
-                    ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
+                .match(OutgoingBroadcastMessage.class, outBrdMsg -> {
+                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + outBrdMsg.toChannel);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-                    brdMsg.sentFrom = userName;
-                    channel.tell(brdMsg, self());
+                    if (userChannel != null) {
+                        outBrdMsg.sentFrom = userName;
+                        userChannel.tell(outBrdMsg, self());
+                    } else { // not in this channel
+                        tellClientSystem("Not in channel, can't send.");
+                    }
                 })
                 .match(ChannelListMessage.class, chLstMsg -> {
-                    ActorSelection sel = getContext().getSystem().actorSelection("/user/ChannelCreator");
+                    ActorSelection sel = getContext().getSystem().actorSelection(channelCreatorPath);
                     ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
-                    channelCreator.
                     // get list
+                    //channelCreator.
                 })
                 .match(ConnectMessage.class, connMsg -> {
                     clientUserActor = connMsg.clientUserActor;
                 })
-                .match(UpgradeModeMessage.class, upModeMessage -> {
+                .match(OutgoingPromoteDemoteMessage.class, prmDemUsrMsg -> {
+                    ActorSelection sel = getContext().actorSelection(prmDemUsrMsg.channel);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-
+                    userChannel.forward(prmDemUsrMsg, getContext());
                 })
-                .build();
+                .match(KickMessage.class, kckMsg -> {
+                    ActorSelection sel = getContext().actorSelection(kckMsg.channel);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+
+                    if (userChannel != null) { // user exists
+                        userChannel.forward(kckMsg, getContext());
+                    } else { // cannot kick if not in channel
+                        tellClientSystem("Cannot kick, you are not in this channel");
+                    }
+                }).build();
     }
 
-    @Override
-    public void preStart() {
-        // set user name
-        //userName =
-        channelCreatorSel = getContext().actorSelection("ChannelCreator");
+    private void tellClient(String message) {
+        clientUserActor.tell(message, self());
     }
 
-
-
-    public void promoteAnotherUser(String channelName, String userNameToPromote, String promotionLevel) {
-        ActorSelection channelActor = getContext().system().actorSelection(actorsPath + channelName);
-        UpgradeModeMessage upgradeModeMessage = new UpgradeModeMessage();
-        upgradeModeMessage.upgradedUser = userNameToPromote;
-        upgradeModeMessage.userMode = upgradeModeMessage.textToUserMode(promotionLevel);
-
-
-        channelActor.tell(upgradeModeMessage, self());
+    private void tellClientSystem(String message) {
+        tellClient("SYSTEM: " + message);
     }
-
 
 }

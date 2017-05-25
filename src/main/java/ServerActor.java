@@ -14,10 +14,14 @@ public class ServerActor extends AbstractActor {
                     ConnectMessage connectMessage = new ConnectMessage();
                     // Create ServerUserActor in the system
 
-                    ActorRef serverUserActor = getContext().actorOf(Props.create(ServerUserActor.class, "ServerUser" + connMsg.userName));
+                    ActorRef serverUserActor = getContext().actorOf(Props.create(ServerUserActor.class, connMsg.userName), "ServerUser" + connMsg.userName);
+
                     connectMessage.serverUserActor = serverUserActor;
-                    sender().tell(connectMessage, self());
-                    connectMessage.clientUserActor = sender();
+                    ActorRef clientUserActor = sender();
+                    clientUserActor.tell(connectMessage, self());
+
+                    //connectMessage = new ConnectMessage();
+                    connectMessage.clientUserActor = clientUserActor;
                     serverUserActor.tell(connectMessage, self());
                 })
                 .build();
@@ -25,6 +29,6 @@ public class ServerActor extends AbstractActor {
 
     @Override
     public void preStart() {
-        getContext().actorOf(Props.create(ChannelCreator.class,  "ChannelCreator"));
+        getContext().actorOf(Props.create(ChannelCreator.class),  "ChannelCreator");
     }
 }

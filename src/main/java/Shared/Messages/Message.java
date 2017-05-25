@@ -1,8 +1,8 @@
 package Shared.Messages;
 
-;
+;import java.io.Serializable;
 
-public class Message {
+public class Message implements Serializable {
 
 
 }

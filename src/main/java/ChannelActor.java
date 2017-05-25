@@ -1,29 +1,29 @@
 import akka.actor.AbstractActor;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import Shared.Messages.*;
-import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.routing.ActorRefRoutee;
+import akka.routing.BroadcastRoutingLogic;
 import akka.routing.RoundRobinRoutingLogic;
-import akka.routing.Routee;
 import akka.routing.Router;
 
 public class ChannelActor extends AbstractActor {
 
     private String channelName;
-    Router router = new Router(new RoundRobinRoutingLogic());
+    Router router;
+
+    public ChannelActor(String channelName) {
+        this.channelName = channelName;
+        router = new Router(new BroadcastRoutingLogic());
+
+    }
+
+    @Override
+    public void preStart(){
+
+    }
 
     public String getChannelName() { return channelName; }
 
-    private LinkedList<ActorRef> onlineUsers;
-    private LinkedList<ActorRef> bannedUsers;
-    private LinkedList<ActorRef> operators;
-    private LinkedList<ActorRef> voicedUsers;
-    private ActorRef Owner;
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -31,69 +31,53 @@ public class ChannelActor extends AbstractActor {
 
                     JoinApprovalMessage approvalMessage = new JoinApprovalMessage();
 
-                    if (!bannedUsers.contains(sender())) {
-                        getContext().watch(sender());
-                        router.addRoutee(new ActorRefRoutee(sender()));
-                    } else { // notify it is banned
-                        approvalMessage.approved = false;
-                    }
+                    // check if not already in channel ?
+
+                    getContext().watch(sender());
+                    router = router.addRoutee(new ActorRefRoutee(sender()));
+                    approvalMessage.mode = joinMsg.userMode;
+                    approvalMessage.joinedChannelName = channelName;
 
                     sender().tell(approvalMessage, self());
+
+                    // tell the users in the channel that a new one has joined
+                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
+                    incBrdTxtMsg.text = "User " + joinMsg.userName + " has joined.";
+                    incBrdTxtMsg.sentFrom = null;
+                    router.route(incBrdTxtMsg, self());
                 })
-                /*
-                .match(Work.class, message -> {
-                    router.route(message, getSender());
-                })
-                .match(Terminated.class, message -> {
-                    router = router.removeRoutee(message.actor());
-                    ActorRef r = getContext().actorOf(Props.create(Worker.class));
-                    getContext().watch(r);
-                    router = router.addRoutee(new ActorRefRoutee(r));
-                })
-                */
-                .match(BroadcastMessage.class, broadMsg -> {
+
+                .match(OutgoingBroadcastMessage.class, broadMsg -> {
 
                     IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
                     incBrdTxtMsg.text = broadMsg.text;
                     incBrdTxtMsg.sentFrom = broadMsg.sentFrom;
                     incBrdTxtMsg.channel = channelName;
+
                     router.route(incBrdTxtMsg, self());
                 })
                 .match(LeaveChannelMessage.class, leaveChMsg -> {
-                    router.removeRoutee(sender());
+                    router = router.removeRoutee(sender());
+
+                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
+                    incBrdTxtMsg.text = "User " + leaveChMsg.leavingUserName + " has left.";
+                    incBrdTxtMsg.sentFrom = null;
+
+                    router.route(incBrdTxtMsg, self());
+
                 })
                 .match(UserListInChannelMessage.class, uLstChMsg -> {
-                    router.routees()
+                    //router.routees()
 
                 })
-                .match(KickMessage.class, kckMsg -> {
-                    //if (getSender())
-                    //kckMsg.
-                })
-                .match(UpgradeModeMessage.class, upModeMsg -> {
-                    ActorRef userActor = sender();
+                .match(KickMessage.class, kckMsg -> { // used also for ban
+                    router = router.removeRoutee(kckMsg.userActorToKick);
 
-                    switch (upModeMsg.userMode) {
-                        case USER:
+                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
+                    incBrdTxtMsg.text = "User " + kckMsg.userNameToKick + " was kicked.";
 
-                            break;
+                    router.route(incBrdTxtMsg, self());
 
-                        case VOICE:
-                            if (operators.contains(getSender())) {
-
-                            }
-                            break;
-
-                        case OPERATOR:
-
-                            break;
-
-                        case OWNER:
-
-                            break;
-                    }
-
-                })
-                .build();
+                }).build();
     }
 }

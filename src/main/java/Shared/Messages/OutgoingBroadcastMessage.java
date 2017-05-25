@@ -1,6 +1,8 @@
 package Shared.Messages;
 
-public class BroadcastMessage extends OutgoingTextMessage {
+public class OutgoingBroadcastMessage extends Message {
+    public String text;
     public String toChannel;
     public String sentFrom;
+
 }

@@ -1,6 +1,4 @@
-import Shared.Messages.BroadcastMessage;
-import Shared.Messages.JoinMessage;
-import Shared.Messages.NewChannelCreatedMessage;
+import Shared.Messages.*;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -11,17 +9,23 @@ public class ChannelCreator extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
         .match(JoinMessage.class, joinMessage -> {
-            ActorSelection sel = getContext().actorSelection(joinMessage.channelName);
-            ActorRef channelToJoin = HelperFunctions.getActorRefBySelection(sel);
 
-            if (channelToJoin == null) {
-                channelToJoin = getContext().actorOf(Props.create(ChannelActor.class, joinMessage.channelName)
-                        .withMailbox("akka.dispatch.UnboundedMailbox"));
+            // create the channel
+            ActorRef channelToJoin = getContext().actorOf(Props.create(ChannelActor.class, joinMessage.channelName), joinMessage.channelName);
+                    //.withMailbox("akka.dispatch.UnboundedMailbox"));
 
-            }
+            // After creating a new channel, tell it that the user who created it should be the owner
+            joinMessage.userMode = UserMode.OWNER;
 
             channelToJoin.forward(joinMessage, getContext());
-        })
-                .build();
+
+        }).build();
+    }
+
+    String test;
+
+    @Override
+    public void preStart() {
+        test = "hi";
     }
 }
