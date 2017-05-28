@@ -63,7 +63,7 @@ public class ServerUserChannelActor extends AbstractActor {
         .match(LeaveChannelMessage.class, leaveChMsg -> {
             //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
             //ActorRef channelToLeave = HelperFunctions.getActorRefBySelection(sel);
-
+            leaveChMsg.userModeOfLeavingUser = userMode;
             if (channel != null) {
                 channel.tell(leaveChMsg, self());
                 userMode = UserMode.OUT;
@@ -76,7 +76,9 @@ public class ServerUserChannelActor extends AbstractActor {
                 if (userMode != UserMode.BANNED && userMode != UserMode.OUT) {
                     //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
                     //ActorRef channelToBroadcast = HelperFunctions.getActorRefBySelection(sel);
-
+                    brdMsg.sentFrom = ((userMode == UserMode.OWNER || userMode == UserMode.OPERATOR)
+                            ? "@"
+                            : (userMode == UserMode.VOICE ? "+" : "")) + brdMsg.sentFrom;
                     channel.tell(brdMsg, self());
                 } else if (userMode == UserMode.BANNED) {
                     tellClientSystem("Banned, cannot send messages to channel.");
@@ -131,27 +133,38 @@ public class ServerUserChannelActor extends AbstractActor {
         })
         .match(IncomingPromoteDemoteMessage.class, incPrmDemMsg -> {
             if (userMode != UserMode.OWNER && userMode != UserMode.OPERATOR) {
-
                 UserMode prevUserMode = userMode;
                 userMode = incPrmDemMsg.newUserMode;
 
-                String message = null;
+                String messageToClient = null;
+                String messageToParticipants = null;
                 if (userMode == UserMode.BANNED) {
                     getKickedFromChannel();
-                    message = "Banned.";
+                    messageToClient = "Banned.";
+                    messageToParticipants = "User " + userName + " was banned.";
                 } else if (userMode == UserMode.OPERATOR) {
-                    message = "Status changed to OPERATOR.";
+                    messageToClient = "Status changed to OPERATOR.";
+                    messageToParticipants = "User " + userName + " was changed to OPERATOR.";
                 } else if (userMode == UserMode.USER) {
-                    message = "Status changed to USER.";
+                    messageToClient = "Status changed to USER.";
+                    messageToParticipants = "User " + userName + " was changed to USER.";
                 } else if (userMode == UserMode.VOICE) {
-                    message = "Status changed to VOICED.";
+                    messageToClient = "Status changed to VOICED.";
+                    messageToParticipants = "User " + userName + " was changed to VOICED";
                 } else if (userMode == UserMode.OWNER) {
-                    message = "Status changed to OWNER.";
+                    messageToClient = "Status changed to OWNER.";
+                    messageToParticipants = "User " + userName + " was changed to OWNER.";
                 } else if (userMode == UserMode.OUT) {
                     getKickedFromChannel();
-                    message = "Kicked.";
+                    messageToClient = "Kicked.";
+                    messageToParticipants = "User " + userName + " was kicked.";
                 }
-                tellClient(message);
+                OutgoingBroadcastMessage outBrdMsg = new OutgoingBroadcastMessage();
+                outBrdMsg.text = messageToParticipants;
+                outBrdMsg.sentFrom = userName;
+
+                channel.tell(outBrdMsg, self());
+                tellClient(messageToClient);
             }
         }).match(UserListInChannelMessage.class, ulChMsg -> {
             // tell the client my channel name
@@ -170,6 +183,10 @@ public class ServerUserChannelActor extends AbstractActor {
         //ActorRef channelToKickFrom = HelperFunctions.getActorRefBySelection(sel);
 
         channel.tell(kckMsg, self());
+
+        //
+        GotKickedMessage gotKickedMessage = new GotKickedMessage();
+        getContext().parent().tell(gotKickedMessage, self());
     }
 
 

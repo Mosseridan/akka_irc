@@ -59,7 +59,11 @@ public class ChannelActor extends AbstractActor {
                     broadcastMessage("User " + leaveChMsg.leavingUserName + " has left.");
 
                     // arbitrarily select another owner
-
+                    if (leaveChMsg.userModeOfLeavingUser == UserMode.OWNER) {
+                        IncomingPromoteDemoteMessage incPrmDemMsg = new IncomingPromoteDemoteMessage();
+                        incPrmDemMsg.newUserMode = UserMode.OWNER;
+                        router.routees().head().send(incPrmDemMsg, self());
+                    }
                 })
                 .match(UserListInChannelMessage.class, uLstChMsg -> {
                     //router.routees()

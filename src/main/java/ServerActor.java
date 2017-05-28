@@ -1,3 +1,4 @@
+import Shared.Messages.ChannelListMessage;
 import Shared.Messages.ConnectMessage;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -6,6 +7,7 @@ import akka.actor.Props;
 
 public class ServerActor extends AbstractActor {
 
+    final String channelCreatorPath = "/user/Server/ChannelCreator";
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -20,9 +22,15 @@ public class ServerActor extends AbstractActor {
                     ActorRef clientUserActor = sender();
                     clientUserActor.tell(connectMessage, self());
 
-                    //connectMessage = new ConnectMessage();
                     connectMessage.clientUserActor = clientUserActor;
                     serverUserActor.tell(connectMessage, self());
+
+                    // tell the channel creator to send the user the channel list
+                    ActorSelection sel = getContext().actorSelection(channelCreatorPath);
+                    ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
+
+                    ChannelListMessage chLstMsg = new ChannelListMessage();
+                    channelCreator.forward(chLstMsg, getContext());
                 })
                 .build();
     }

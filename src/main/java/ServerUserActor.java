@@ -103,7 +103,11 @@ public class ServerUserActor extends AbstractActor {
                     } else { // cannot kick if not in channel
                         tellClientSystem("Cannot kick, you are not in this channel");
                     }
-                }).build();
+                })
+                .match(GotKickedMessage.class, gotKckMsg -> {
+                    sender().tell(akka.actor.PoisonPill.getInstance(), self());
+                })
+                .build();
     }
 
     private void tellClient(String message) {

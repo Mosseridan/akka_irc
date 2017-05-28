@@ -49,6 +49,7 @@ public class ClientUserActor extends AbstractActor {
                     // append to user list text pane (lock)
                     //chatWindow.textPaneUsersInChannelList
                     //ulChMsg.users
+                    //ulChMsg
                 })
                 .build();
     }
