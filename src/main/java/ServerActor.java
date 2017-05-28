@@ -1,5 +1,6 @@
-import Shared.Messages.ChannelListMessage;
+
 import Shared.Messages.ConnectMessage;
+import Shared.Messages.GetChannelListMessage;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -29,7 +30,7 @@ public class ServerActor extends AbstractActor {
                     ActorSelection sel = getContext().actorSelection(channelCreatorPath);
                     ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
 
-                    ChannelListMessage chLstMsg = new ChannelListMessage();
+                    GetChannelListMessage chLstMsg = new GetChannelListMessage();
                     channelCreator.forward(chLstMsg, getContext());
                 })
                 .build();

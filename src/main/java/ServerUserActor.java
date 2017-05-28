@@ -51,7 +51,7 @@ public class ServerUserActor extends AbstractActor {
                     userChannel.forward(joinMsg, getContext());
                 })
                 .match(LeaveChannelMessage.class, leaveChMsg -> {
-                    ActorSelection sel = getContext().actorSelection(leaveChMsg.channelToLeave);
+                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + leaveChMsg.channelToLeave);
                     ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
                     leaveChMsg.leavingUserName = userName;
@@ -74,16 +74,17 @@ public class ServerUserActor extends AbstractActor {
 
                     userChannel.forward(chTlMsg, getContext());
                 })
-                .match(ChannelListMessage.class, chLstMsg -> {
+                .match(GetChannelListMessage.class, getChLstMsg -> {
                     ActorSelection sel = getContext().getSystem().actorSelection(channelCreatorPath);
                     ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
                     // get list
-                    channelCreator.forward(chLstMsg, getContext());
+                    channelCreator.forward(getChLstMsg, getContext());
                 })
-                .match(UserListInChannelMessage.class, ulChMsg -> {
-                    ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + ulChMsg.channelName);
+                .match(GetUserListInChannelMessage.class, getUlChMsg -> {
+                    ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + getUlChMsg.channelName);
                     ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
-                    channel.forward(ulChMsg, getContext());
+
+                    channel.forward(getUlChMsg, getContext());
                 })
                 .match(ConnectMessage.class, connMsg -> {
                     clientUserActor = connMsg.clientUserActor;

@@ -21,14 +21,16 @@ public class ChannelCreator extends AbstractActor {
 
         })
 
-        .match(ChannelListMessage.class, chLstMsg -> {
+        .match(GetChannelListMessage.class, chLstMsg -> {
             // Preferring that ChannelCreator will send all the users the channels list,
             // instead of making all the channels send its name to every user.
             Iterable<ActorRef> children = getContext().getChildren();
             List<String> channelNames = new LinkedList<>();
             children.forEach(childChannel -> channelNames.add(childChannel.toString()));
-            chLstMsg.channels = channelNames;
-            sender().tell(chLstMsg, self());
+
+            SetChannelListMessage setChLstMsg = new SetChannelListMessage();
+            setChLstMsg.channels = channelNames;
+            sender().tell(setChLstMsg, self());
 
         }).build();
     }

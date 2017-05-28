@@ -55,16 +55,16 @@ public class ChatWindow {
     ListSelectionListener slChannels = new ListSelectionListener() {
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            UserListInChannelMessage ulChMsg = new UserListInChannelMessage();
+            usersInChannel.clear();
+            GetUserListInChannelMessage ulChMsg = new GetUserListInChannelMessage();
             ulChMsg.channelName = e.toString();
             clientUserActor.tell(ulChMsg, null);
-
-            e.toString();
         }
     };
 
     String userName;
     java.util.List<String> channels;
+    java.util.List<String> usersInChannel;
 
     public ChatWindow() {
         initialize();

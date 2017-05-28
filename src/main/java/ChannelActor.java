@@ -65,11 +65,7 @@ public class ChannelActor extends AbstractActor {
                         router.routees().head().send(incPrmDemMsg, self());
                     }
                 })
-                .match(UserListInChannelMessage.class, uLstChMsg -> {
-                    //router.routees()
-
-                })
-                .match(UserListInChannelMessage.class, ulChMsg -> {
+                .match(GetUserListInChannelMessage.class, ulChMsg -> {
                     router.route(ulChMsg, sender());
                 })
                 .match(ChangeTitleMessage.class, chTlMsg -> {

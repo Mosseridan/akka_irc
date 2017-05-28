@@ -40,14 +40,21 @@ public class ClientUserActor extends AbstractActor {
                     }
                     currentChannel = joinAppMsg.joinedChannelName;
                 })
-                .match(ChannelListMessage.class, chLstMsg -> {
-                    chatWindow.channels = chLstMsg.channels;
+                .match(GetChannelListMessage.class, getChLstMsg -> {
+                    serverUserActor.tell(getChLstMsg, self());
+                })
+                .match(SetChannelListMessage.class, setChLstMsg -> {
+                    chatWindow.channels = setChLstMsg.channels;
                     //chatWindow.textPaneChannelList
                     //chLstMsg.channels;
                 })
-                .match(UserListInChannelMessage.class, ulChMsg -> {
+                .match(GetUserListInChannelMessage.class, getUlstChMsg -> {
+                    serverUserActor.tell(getUlstChMsg, self());
+                })
+                .match(SetUserListInChannelMessage.class, setULstChMsg -> {
                     // append to user list text pane (lock)
                     //chatWindow.textPaneUsersInChannelList
+                    chatWindow.usersInChannel.add(setULstChMsg.user);
                     //ulChMsg.users
                     //ulChMsg
                 })

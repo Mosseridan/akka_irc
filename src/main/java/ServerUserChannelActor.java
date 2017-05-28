@@ -166,10 +166,12 @@ public class ServerUserChannelActor extends AbstractActor {
                 channel.tell(outBrdMsg, self());
                 tellClient(messageToClient);
             }
-        }).match(UserListInChannelMessage.class, ulChMsg -> {
+        }).match(GetUserListInChannelMessage.class, setUlChMsg -> {
             // tell the client my channel name
-            ulChMsg.channelName = channelName;
-            sender().tell(ulChMsg, self());
+            SetUserListInChannelMessage setUlLstChMsg = new SetUserListInChannelMessage();
+            setUlLstChMsg.user = userName;
+            //ulChMsg.channelName = channelName;
+            sender().tell(setUlChMsg, self());
         }).build();
     }
 
