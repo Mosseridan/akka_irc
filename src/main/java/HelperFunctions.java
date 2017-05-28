@@ -20,18 +20,12 @@ public class HelperFunctions {
 
         try {
             identity = (ActorIdentity) Await.result(future, timeOut.duration());
+            if (identity.ref().isDefined()) {
+                return identity.ref().get();
+            }
         } catch (Exception e) {
-            identity = null;
+            // timeout passed
         }
-        // Also check if not alive anymore
-        if (identity == null) {
-            return null;
-        }
-
-        if (identity.ref().isDefined()) {
-            return identity.ref().get();
-        } else {
-            return null;
-        }
+        return null; // not alive anymore
     }
 }

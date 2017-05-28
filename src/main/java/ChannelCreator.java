@@ -4,6 +4,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class ChannelCreator extends AbstractActor {
     @Override
     public Receive createReceive() {
@@ -14,10 +17,18 @@ public class ChannelCreator extends AbstractActor {
             ActorRef channelToJoin = getContext().actorOf(Props.create(ChannelActor.class, joinMessage.channelName), joinMessage.channelName);
                     //.withMailbox("akka.dispatch.UnboundedMailbox"));
 
-            // After creating a new channel, tell it that the user who created it should be the owner
-            joinMessage.userMode = UserMode.OWNER;
-
             channelToJoin.forward(joinMessage, getContext());
+
+        })
+
+        .match(ChannelListMessage.class, chLstMsg -> {
+            // Preferring that ChannelCreator will send all the users the channels list,
+            // instead of making all the channels send its name to every user.
+            Iterable<ActorRef> children = getContext().getChildren();
+            List<String> channelNames = new LinkedList<>();
+            children.forEach(childChannel -> channelNames.add(childChannel.toString()));
+            chLstMsg.channels = channelNames;
+            sender().tell(chLstMsg, self());
 
         }).build();
     }

@@ -68,11 +68,22 @@ public class ServerUserActor extends AbstractActor {
                         tellClientSystem("Not in channel, can't send.");
                     }
                 })
+                .match(ChangeTitleMessage.class, chTlMsg -> {
+                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + chTlMsg.channelForTitleChange);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+
+                    userChannel.forward(chTlMsg, getContext());
+                })
                 .match(ChannelListMessage.class, chLstMsg -> {
                     ActorSelection sel = getContext().getSystem().actorSelection(channelCreatorPath);
                     ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
                     // get list
-                    //channelCreator.
+                    channelCreator.forward(chLstMsg, getContext());
+                })
+                .match(UserListInChannelMessage.class, ulChMsg -> {
+                    ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + ulChMsg.channelName);
+                    ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
+                    channel.forward(ulChMsg, getContext());
                 })
                 .match(ConnectMessage.class, connMsg -> {
                     clientUserActor = connMsg.clientUserActor;

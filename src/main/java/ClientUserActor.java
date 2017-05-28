@@ -39,7 +39,18 @@ public class ClientUserActor extends AbstractActor {
                         printText("SYSTEM: Successfully created channel <" + joinAppMsg.joinedChannelName + ">.");
                     }
                     currentChannel = joinAppMsg.joinedChannelName;
-                }).build();
+                })
+                .match(ChannelListMessage.class, chLstMsg -> {
+                    chatWindow.channels = chLstMsg.channels;
+                    //chatWindow.textPaneChannelList
+                    //chLstMsg.channels;
+                })
+                .match(UserListInChannelMessage.class, ulChMsg -> {
+                    // append to user list text pane (lock)
+                    //chatWindow.textPaneUsersInChannelList
+                    //ulChMsg.users
+                })
+                .build();
     }
 
     @Override
@@ -125,6 +136,11 @@ public class ClientUserActor extends AbstractActor {
             serverUserActor.tell(leaveMsg, self());
 
         } else if (cmd.equals("/title")) { // Voiced user
+            ChangeTitleMessage chTlMsg = new ChangeTitleMessage();
+            chTlMsg.channelForTitleChange = cmdArr[1];
+            chTlMsg.newTitle = cmdArr[2];
+
+            serverUserActor.tell(chTlMsg, self());
 
         } else if (cmd.equals("/kick")) { // Channel operator
             OutgoingPromoteDemoteMessage proDemoMsg = new OutgoingPromoteDemoteMessage();

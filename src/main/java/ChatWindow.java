@@ -9,11 +9,13 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ChatWindow {
@@ -23,9 +25,10 @@ public class ChatWindow {
 
     public JFrame frame;
     public JTextField textFieldInput;
-    public JTextPane textPaneChannelList;
     public JPanel mainPanel;
     public JTextArea textAreaOutput;
+    public JList listUsersInChannel;
+    public JList listChannels;
 
     public static void main(String[] args) {
 
@@ -49,7 +52,15 @@ public class ChatWindow {
 
     }
 
+    ListSelectionListener slChannels = new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+
+        }
+    };
+
     String userName;
+    java.util.List<String> channels;
 
     public ChatWindow() {
         initialize();
@@ -85,6 +96,9 @@ public class ChatWindow {
 
         DefaultCaret caret = (DefaultCaret) textAreaOutput.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+        channels = new LinkedList<>();
+        listChannels = new JList(channels.toArray());
     }
 
     private void login(String[] loginText) {

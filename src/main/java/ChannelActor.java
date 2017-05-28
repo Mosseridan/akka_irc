@@ -9,20 +9,19 @@ import akka.routing.Router;
 public class ChannelActor extends AbstractActor {
 
     private String channelName;
+    private String title;
     Router router;
 
     public ChannelActor(String channelName) {
         this.channelName = channelName;
         router = new Router(new BroadcastRoutingLogic());
-
+        title = null;
     }
 
     @Override
     public void preStart(){
 
     }
-
-    public String getChannelName() { return channelName; }
 
     @Override
     public Receive createReceive() {
@@ -33,51 +32,60 @@ public class ChannelActor extends AbstractActor {
 
                     // check if not already in channel ?
 
+                    // if only one user, make it admin.
+                    if (router.routees().isEmpty()) {
+                        approvalMessage.mode = UserMode.OWNER;
+                    } else {
+                        approvalMessage.mode = UserMode.USER;
+                    }
+
                     getContext().watch(sender());
                     router = router.addRoutee(new ActorRefRoutee(sender()));
-                    approvalMessage.mode = joinMsg.userMode;
+
                     approvalMessage.joinedChannelName = channelName;
+                    approvalMessage.joinedChannel = self();
 
                     sender().tell(approvalMessage, self());
 
                     // tell the users in the channel that a new one has joined
-                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
-                    incBrdTxtMsg.text = "User " + joinMsg.userName + " has joined.";
-                    incBrdTxtMsg.sentFrom = null;
-                    router.route(incBrdTxtMsg, self());
+                    broadcastMessage("User " + joinMsg.userName + " has joined.");
                 })
 
                 .match(OutgoingBroadcastMessage.class, broadMsg -> {
-
-                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
-                    incBrdTxtMsg.text = broadMsg.text;
-                    incBrdTxtMsg.sentFrom = broadMsg.sentFrom;
-                    incBrdTxtMsg.channel = channelName;
-
-                    router.route(incBrdTxtMsg, self());
+                    broadcastMessage("{" + broadMsg.sentFrom + "}: " + broadMsg.text);
                 })
                 .match(LeaveChannelMessage.class, leaveChMsg -> {
                     router = router.removeRoutee(sender());
+                    broadcastMessage("User " + leaveChMsg.leavingUserName + " has left.");
 
-                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
-                    incBrdTxtMsg.text = "User " + leaveChMsg.leavingUserName + " has left.";
-                    incBrdTxtMsg.sentFrom = null;
-
-                    router.route(incBrdTxtMsg, self());
+                    // arbitrarily select another owner
 
                 })
                 .match(UserListInChannelMessage.class, uLstChMsg -> {
                     //router.routees()
 
                 })
+                .match(UserListInChannelMessage.class, ulChMsg -> {
+                    router.route(ulChMsg, sender());
+                })
+                .match(ChangeTitleMessage.class, chTlMsg -> {
+                    title = chTlMsg.newTitle;
+                    broadcastMessage("Channel title changed.");
+                })
                 .match(KickMessage.class, kckMsg -> { // used also for ban
                     router = router.removeRoutee(kckMsg.userActorToKick);
 
-                    IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
-                    incBrdTxtMsg.text = "User " + kckMsg.userNameToKick + " was kicked.";
-
-                    router.route(incBrdTxtMsg, self());
+                    broadcastMessage("User " + kckMsg.userNameToKick + " was kicked.");
 
                 }).build();
+    }
+
+    private void broadcastMessage(String message) {
+        IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
+        incBrdTxtMsg.text = "<" + channelName + (title != null ? ": ~" + title : "") + "> " + message;
+
+        router.route(incBrdTxtMsg, self());
+
+
     }
 }
