@@ -1,4 +1,4 @@
 package Shared.Messages;
 
-public class RemoveFromChannelMessage {
+public class RemoveFromChannelMessage extends Message {
 }

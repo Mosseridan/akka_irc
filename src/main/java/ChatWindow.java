@@ -1,12 +1,7 @@
 import Shared.Messages.*;
 import akka.actor.*;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -15,8 +10,6 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class ChatWindow {
 
@@ -27,8 +20,11 @@ public class ChatWindow {
     public JTextField textFieldInput;
     public JPanel mainPanel;
     public JTextArea textAreaOutput;
-    public JList listUsersInChannel;
-    public JList listChannels;
+    public JList listUsersInChannelJList;
+    public JList listChannelsJList;
+
+    DefaultListModel<String> channelListModel = new DefaultListModel();
+    DefaultListModel<String> usersInChannelListModel = new DefaultListModel();
 
     public static void main(String[] args) {
 
@@ -55,7 +51,7 @@ public class ChatWindow {
     ListSelectionListener slChannels = new ListSelectionListener() {
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            usersInChannel.clear();
+            channelListModel.clear();
             GetUserListInChannelMessage ulChMsg = new GetUserListInChannelMessage();
             ulChMsg.channelName = e.toString();
             clientUserActor.tell(ulChMsg, null);
@@ -63,8 +59,6 @@ public class ChatWindow {
     };
 
     String userName;
-    java.util.List<String> channels;
-    java.util.List<String> usersInChannel;
 
     public ChatWindow() {
         initialize();
@@ -74,7 +68,7 @@ public class ChatWindow {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER)
                 {
                     String text = textFieldInput.getText();
-                    if (text.startsWith("/login") || text.startsWith("/l")) {
+                    if (text.startsWith("/login")) {
                         String[] loginText = text.split(" ");
                         login(loginText);
                     } else {
@@ -101,8 +95,14 @@ public class ChatWindow {
         DefaultCaret caret = (DefaultCaret) textAreaOutput.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
-        channels = new LinkedList<>();
-        listChannels = new JList(channels.toArray());
+        listChannelsJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+
+        //listChannelsJList = new JList(channelListModel);
+        listChannelsJList.addListSelectionListener(slChannels);
+
+        //listUsersInChannelJList = new JList(usersInChannelListModel);
+
+        channelListModel.addElement("hellop");
     }
 
     private void login(String[] loginText) {
@@ -110,9 +110,6 @@ public class ChatWindow {
 
         Config configWithPort = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + loginText[2]).withFallback(ConfigFactory.load());
         ConfigFactory.invalidateCaches();
-        ///Config actualConfig = configWithPort.withFallback(ConfigFactory.load());
-
-        //system = ActorSystem.create("IRCClient");
 
         system = ActorSystem.create("IRCClient", configWithPort);
         clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName, this), "ClientUserActor");

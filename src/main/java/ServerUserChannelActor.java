@@ -29,31 +29,10 @@ public class ServerUserChannelActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JoinMessage.class, joinMsg -> {
-            if (channel == null) {
-                if (userMode == UserMode.BANNED) { // Create / Join the channel
-                    tellClient("Banned, cannot join channel");
-                } else {
-                    joinMsg.userName = userName;
-                    ActorSelection channelSel = getContext().actorSelection(channelCreatorPath + "/" + joinMsg.channelName);
-                    ActorRef channelToJoin = HelperFunctions.getActorRefBySelection(channelSel);
-
-                    if (channelToJoin == null) { // channel does not exist
-                        // get the ChannelCreator actor
-                        ActorSelection channelCreatorSel = getContext().actorSelection(channelCreatorPath);
-                        ActorRef channelCreator = HelperFunctions.getActorRefBySelection(channelCreatorSel);
-
-                        // ask ChannelCreator to join it
-                        channelCreator.tell(joinMsg, self());
-                    } else { // channel already exist, ask it directly
-                        channelToJoin.tell(joinMsg, self());
-                    }
-                }
-            } else {
-                tellClientSystem("Already in the channel.");
-            }
+            joinChannel(joinMsg);
         })
         .match(JoinApprovalMessage.class, joinAppMsg -> {
-            channel = joinAppMsg.joinedChannel;
+            //channel = joinAppMsg.joinedChannel;
             userMode = joinAppMsg.mode;
             joinAppMsg.joinedChannelName = channelName;
             joinAppMsg.joinedChannel = null;
@@ -61,43 +40,40 @@ public class ServerUserChannelActor extends AbstractActor {
             clientUserActor.tell(joinAppMsg, self());
         })
         .match(LeaveChannelMessage.class, leaveChMsg -> {
-            //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
-            //ActorRef channelToLeave = HelperFunctions.getActorRefBySelection(sel);
-            leaveChMsg.userModeOfLeavingUser = userMode;
-            if (channel != null) {
-                channel.tell(leaveChMsg, self());
-                userMode = UserMode.OUT;
+            if (userMode == UserMode.BANNED)
+            {
+                tellClientSystem("Banned, cannot leave channel");
             } else {
-                tellClientSystem("Cannot leave a channel that you are not in it");
+                ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+                ActorRef channelToLeave = HelperFunctions.getActorRefBySelection(sel);
+                leaveChMsg.userModeOfLeavingUser = userMode;
+                if (channelToLeave != null) {
+                    channelToLeave.tell(leaveChMsg, self());
+                    tellClient("You have left the channel");
+                    //userMode = UserMode.OUT;
+                } else {
+                    tellClientSystem("Cannot leave a channel that you are not in it");
+                }
             }
 
         }).match(OutgoingBroadcastMessage.class, brdMsg -> {
-            if (channel != null) {
-                if (userMode != UserMode.BANNED && userMode != UserMode.OUT) {
-                    //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
-                    //ActorRef channelToBroadcast = HelperFunctions.getActorRefBySelection(sel);
-                    brdMsg.sentFrom = ((userMode == UserMode.OWNER || userMode == UserMode.OPERATOR)
-                            ? "@"
-                            : (userMode == UserMode.VOICE ? "+" : "")) + brdMsg.sentFrom;
-                    channel.tell(brdMsg, self());
-                } else if (userMode == UserMode.BANNED) {
-                    tellClientSystem("Banned, cannot send messages to channel.");
-                } else if (userMode == UserMode.OUT) {
-                    tellClientSystem("Out of channel, needs to join first. Cannot send.");
-                }
+            if (userMode == UserMode.BANNED) {
+                tellClientSystem("Banned, cannot send messages to channel.");
             } else {
-                tellClientSystem("Must join channel first");
+                ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+                ActorRef channelToBroadcast = HelperFunctions.getActorRefBySelection(sel);
+                brdMsg.sentFrom = ((userMode == UserMode.OWNER || userMode == UserMode.OPERATOR)
+                        ? "@"
+                        : (userMode == UserMode.VOICE ? "+" : "")) + brdMsg.sentFrom;
+                channelToBroadcast.tell(brdMsg, self());
             }
-
 
         }).match(ChangeTitleMessage.class, chTlMsg -> {
             if (userMode == UserMode.VOICE || userMode == UserMode.OPERATOR || userMode == UserMode.OWNER) {
-                //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
-                //ActorRef channelToBroadcast = HelperFunctions.getActorRefBySelection(sel);
+                ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+                ActorRef channelToBroadcast = HelperFunctions.getActorRefBySelection(sel);
 
-                channel.tell(chTlMsg, self());
-            } else if (userMode == UserMode.OUT) {
-                tellClientSystem("Out of channel, cannot change title");
+                channelToBroadcast.tell(chTlMsg, self());
             } else if (userMode == UserMode.USER) {
                 tellClientSystem("Ordinary user cannot change title");
             } else if (userMode == UserMode.BANNED) {
@@ -124,7 +100,7 @@ public class ServerUserChannelActor extends AbstractActor {
                 } else {
                     tellClientSystem("Requested user for state changing is not in channel");
                 }
-            } else if (userMode == UserMode.BANNED || userMode == UserMode.OUT) {
+            } else if (userMode == UserMode.BANNED) {
                 tellClientSystem("Out of channel, cannot change others mode");
             } else { // can't promote/demote no one
                 tellClientSystem("You don't have the sufficient privileges to change others mode");
@@ -133,62 +109,101 @@ public class ServerUserChannelActor extends AbstractActor {
         })
         .match(IncomingPromoteDemoteMessage.class, incPrmDemMsg -> {
             if (userMode != UserMode.OWNER && userMode != UserMode.OPERATOR) {
-                UserMode prevUserMode = userMode;
-                userMode = incPrmDemMsg.newUserMode;
 
-                String messageToClient = null;
-                String messageToParticipants = null;
-                if (userMode == UserMode.BANNED) {
-                    getKickedFromChannel();
-                    messageToClient = "Banned.";
-                    messageToParticipants = "User " + userName + " was banned.";
-                } else if (userMode == UserMode.OPERATOR) {
-                    messageToClient = "Status changed to OPERATOR.";
-                    messageToParticipants = "User " + userName + " was changed to OPERATOR.";
-                } else if (userMode == UserMode.USER) {
-                    messageToClient = "Status changed to USER.";
-                    messageToParticipants = "User " + userName + " was changed to USER.";
-                } else if (userMode == UserMode.VOICE) {
-                    messageToClient = "Status changed to VOICED.";
-                    messageToParticipants = "User " + userName + " was changed to VOICED";
-                } else if (userMode == UserMode.OWNER) {
-                    messageToClient = "Status changed to OWNER.";
-                    messageToParticipants = "User " + userName + " was changed to OWNER.";
-                } else if (userMode == UserMode.OUT) {
-                    getKickedFromChannel();
-                    messageToClient = "Kicked.";
-                    messageToParticipants = "User " + userName + " was kicked.";
+                if (userMode == UserMode.BANNED)
+                    return;
                 }
+
+                userMode = incPrmDemMsg.newUserMode;
                 OutgoingBroadcastMessage outBrdMsg = new OutgoingBroadcastMessage();
-                outBrdMsg.text = messageToParticipants;
-                outBrdMsg.sentFrom = userName;
+                outBrdMsg.sentFrom = null;
+
+                if (userMode == UserMode.BANNED) {
+                    getRemovedFromChannel();
+
+                    tellClient("Banned from {" + channelName + "}.");
+                    outBrdMsg.text = "User {" + userName + "} was banned.";
+                } else if (userMode == UserMode.OPERATOR) {
+                    //tellClient("Status changed to OPERATOR.");
+                    outBrdMsg.text = "User {" + userName + "} was changed to OPERATOR.";
+                } else if (userMode == UserMode.USER) {
+                    //tellClient("Status changed to USER.");
+                    outBrdMsg.text = "User {" + userName + "} was changed to USER.";
+                } else if (userMode == UserMode.VOICE) {
+                    //tellClient("Status changed to VOICED.");
+                    outBrdMsg.text = "User {" + userName + "} was changed to VOICED";
+                } else if (userMode == UserMode.OWNER) {
+                    //tellClient("Status changed to OWNER.");
+                    outBrdMsg.text = "User {" + userName + "} was changed to OWNER.";
+                } else if (incPrmDemMsg.newUserMode == UserMode.OUT) {
+                    getRemovedFromChannel();
+
+                    tellClient("Kicked from {" + channelName + "}.");
+                    outBrdMsg.text = "User " + userName + " was kicked.";
+                }
+
+
+                ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+                ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
 
                 channel.tell(outBrdMsg, self());
-                tellClient(messageToClient);
-            }
-        }).match(GetUserListInChannelMessage.class, setUlChMsg -> {
+
+                if (incPrmDemMsg.newUserMode == UserMode.OUT) {
+                    GotKickedMessage gotKickedMessage = new GotKickedMessage();
+                    getContext().parent().tell(gotKickedMessage, self());
+                }
+        }).match(SetUserListInChannelMessage.class, setUlChMsg -> {
             // tell the client my channel name
             SetUserListInChannelMessage setUlLstChMsg = new SetUserListInChannelMessage();
             setUlLstChMsg.user = userName;
             //ulChMsg.channelName = channelName;
             sender().tell(setUlChMsg, self());
+        }).match(SetChannelListMessage.class, setUlChMsg -> {
+            clientUserActor.tell(setUlChMsg, self());
+            sender().tell(setUlChMsg, self());
+        })
+        .match(KillChannelMessage.class, klChMsg -> {
+            if (userMode == UserMode.OWNER) {
+                ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+                ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
+
+                channel.tell(klChMsg, self());
+            }
         }).build();
     }
 
-    private void getKickedFromChannel() {
-        KickMessage kckMsg = new KickMessage();
-        kckMsg.userNameToKick = userName;
-        kckMsg.channel = channelName;
-        kckMsg.userActorToKick = self();
+    private void joinChannel(JoinMessage joinMsg) {
+        if (userMode == UserMode.BANNED) { // Create / Join the channel
+            tellClient("Banned, cannot join channel");
+        } else {
+            joinMsg.userName = userName;
+            ActorSelection channelSel = getContext().actorSelection(channelCreatorPath + "/" + joinMsg.channelName);
+            ActorRef channelToJoin = HelperFunctions.getActorRefBySelection(channelSel);
 
-        //ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
-        //ActorRef channelToKickFrom = HelperFunctions.getActorRefBySelection(sel);
+            if (channelToJoin == null) { // channel does not exist
+                // get the ChannelCreator actor
+                ActorSelection channelCreatorSel = getContext().actorSelection(channelCreatorPath);
+                ActorRef channelCreator = HelperFunctions.getActorRefBySelection(channelCreatorSel);
 
-        channel.tell(kckMsg, self());
+                // ask ChannelCreator to join it
+                channelCreator.tell(joinMsg, self());
+            } else { // channel already exist
+                //if (channelToJoin != channel) { // ask it directly to join
+                    channelToJoin.tell(joinMsg, self());
+                //} else {
+                   // tellClientSystem("Already in the channel.");
+                //}
+            }
+        }
+    }
 
-        //
-        GotKickedMessage gotKickedMessage = new GotKickedMessage();
-        getContext().parent().tell(gotKickedMessage, self());
+
+    private void getRemovedFromChannel() {
+        ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+        ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
+
+        RemoveFromChannelMessage rmMsg = new RemoveFromChannelMessage();
+        channel.tell(rmMsg, self());
     }
 
 

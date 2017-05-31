@@ -19,26 +19,35 @@ public class ChannelCreator extends AbstractActor {
 
             channelToJoin.forward(joinMessage, getContext());
 
+            sendChannelListToClient();
         })
 
         .match(GetChannelListMessage.class, chLstMsg -> {
-            // Preferring that ChannelCreator will send all the users the channels list,
-            // instead of making all the channels send its name to every user.
-            Iterable<ActorRef> children = getContext().getChildren();
-            List<String> channelNames = new LinkedList<>();
-            children.forEach(childChannel -> channelNames.add(childChannel.toString()));
+            sendChannelListToClient();
 
-            SetChannelListMessage setChLstMsg = new SetChannelListMessage();
-            setChLstMsg.channels = channelNames;
-            sender().tell(setChLstMsg, self());
+        })
+        .match(KillChannelMessage.class, klChMsg -> {
+            ActorSelection sel = getContext().actorSelection(klChMsg.channelName);
+            ActorRef channelToKill = HelperFunctions.getActorRefBySelection(sel);
 
+            channelToKill.forward(akka.actor.PoisonPill.getInstance(), getContext());
         }).build();
     }
 
-    String test;
+    private void sendChannelListToClient() {
+        // Preferring that ChannelCreator will send all the users the channels list,
+        // instead of making all the channels send its name to every user.
+        Iterable<ActorRef> children = getContext().getChildren();
+        List<String> channelNames = new LinkedList<>();
+        children.forEach(childChannel -> channelNames.add(childChannel.path().name()));
+
+        SetChannelListMessage setChLstMsg = new SetChannelListMessage();
+        setChLstMsg.channels = channelNames;
+        sender().tell(setChLstMsg, self());
+    }
 
     @Override
     public void preStart() {
-        test = "hi";
+
     }
 }

@@ -3,6 +3,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 
+import javax.swing.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -44,7 +45,13 @@ public class ClientUserActor extends AbstractActor {
                     serverUserActor.tell(getChLstMsg, self());
                 })
                 .match(SetChannelListMessage.class, setChLstMsg -> {
-                    chatWindow.channels = setChLstMsg.channels;
+                    DefaultListModel<String> model = new DefaultListModel<>();
+                    for(String val : setChLstMsg.channels)
+                        model.addElement(val);
+
+                    //chatWindow.listChannelsJList.setModel(model);
+                    chatWindow.listChannelsJList = new JList(model);
+                    chatWindow.listChannelsJList.ensureIndexIsVisible(model.getSize());
                     //chatWindow.textPaneChannelList
                     //chLstMsg.channels;
                 })
@@ -54,7 +61,7 @@ public class ClientUserActor extends AbstractActor {
                 .match(SetUserListInChannelMessage.class, setULstChMsg -> {
                     // append to user list text pane (lock)
                     //chatWindow.textPaneUsersInChannelList
-                    chatWindow.usersInChannel.add(setULstChMsg.user);
+                    chatWindow.usersInChannelListModel.addElement(setULstChMsg.user);
                     //ulChMsg.users
                     //ulChMsg
                 })
@@ -93,7 +100,7 @@ public class ClientUserActor extends AbstractActor {
     boolean verifyFormat(String[] arr) {
         boolean isFormatValid = false;
 
-        if (arr[0].equals("/join") || arr[0].equals("/leave")) {
+        if (arr[0].equals("/join") || arr[0].equals("/leave") || arr[0].equals("/disband")) {
             if (arr.length == 2) {
                 isFormatValid = true;
             }
@@ -122,7 +129,10 @@ public class ClientUserActor extends AbstractActor {
     private void handleTextCommand(String text) {
         String[] cmdArr = text.split(" ");
         String cmd = cmdArr[0];
-        verifyFormat(cmdArr);
+        if (!verifyFormat(cmdArr)) {
+            printText("Invalid format");
+            return;
+        }
         if (cmd.equals("/w")) { // normal user
 
             OutgoingPrivateMessage txtMsg = new OutgoingPrivateMessage();
@@ -195,6 +205,11 @@ public class ClientUserActor extends AbstractActor {
             outBrdMsg.text = text.split(cmdArr[1], 2)[1];
 
             serverUserActor.tell(outBrdMsg, self());
+        } else if (cmd.equals("/disband")) {
+            KillChannelMessage klChMsg = new KillChannelMessage();
+            klChMsg.channelName = cmdArr[1];
+
+            serverUserActor.tell(klChMsg, self());
         } else { // broadcast text message
             OutgoingBroadcastMessage outBrdMsg = new OutgoingBroadcastMessage();
             outBrdMsg.text = text;

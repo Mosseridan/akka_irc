@@ -1,10 +1,10 @@
 import akka.actor.AbstractActor;
 
 import Shared.Messages.*;
-import akka.routing.ActorRefRoutee;
-import akka.routing.BroadcastRoutingLogic;
-import akka.routing.RoundRobinRoutingLogic;
-import akka.routing.Router;
+import akka.actor.Terminated;
+import akka.routing.*;
+import scala.collection.IndexedSeq;
+import scala.collection.Traversable;
 
 public class ChannelActor extends AbstractActor {
 
@@ -52,18 +52,37 @@ public class ChannelActor extends AbstractActor {
                 })
 
                 .match(OutgoingBroadcastMessage.class, broadMsg -> {
-                    broadcastMessage("{" + broadMsg.sentFrom + "}: " + broadMsg.text);
+                    if (broadMsg.sentFrom == null) {
+                        broadcastMessage(broadMsg.text);
+                    } else {
+                        broadcastMessage("{" + broadMsg.sentFrom + "}: " + broadMsg.text);
+                    }
+                })
+                .match(KillChannelMessage.class, dsbMsg -> {
+                    broadcastMessage("Owner disbands channel. closing");
+                    killChannel();
                 })
                 .match(LeaveChannelMessage.class, leaveChMsg -> {
                     router = router.removeRoutee(sender());
-                    broadcastMessage("User " + leaveChMsg.leavingUserName + " has left.");
 
-                    // arbitrarily select another owner
-                    if (leaveChMsg.userModeOfLeavingUser == UserMode.OWNER) {
+                    if (router.routees().isEmpty()) {
+
+                        broadcastMessage("Channel is now empty. closing");
+
+                        //kill channel
+                        killChannel();
+
+                    } else if (leaveChMsg.userModeOfLeavingUser == UserMode.OWNER) {
                         IncomingPromoteDemoteMessage incPrmDemMsg = new IncomingPromoteDemoteMessage();
                         incPrmDemMsg.newUserMode = UserMode.OWNER;
-                        router.routees().head().send(incPrmDemMsg, self());
+
+                        Routee promotee = router.routees().head();
+                        promotee.send(incPrmDemMsg, self());
                     }
+
+                    sender().tell(akka.actor.PoisonPill.getInstance(), self());
+                    broadcastMessage("User " + leaveChMsg.leavingUserName + " has left.");
+
                 })
                 .match(GetUserListInChannelMessage.class, ulChMsg -> {
                     router.route(ulChMsg, sender());
@@ -72,12 +91,23 @@ public class ChannelActor extends AbstractActor {
                     title = chTlMsg.newTitle;
                     broadcastMessage("Channel title changed.");
                 })
-                .match(KickMessage.class, kckMsg -> { // used also for ban
-                    router = router.removeRoutee(kckMsg.userActorToKick);
-
-                    broadcastMessage("User " + kckMsg.userNameToKick + " was kicked.");
-
+                .match(Terminated.class, message -> {
+                    //router = router.removeRoutee(message.actor());
+                    IncomingPromoteDemoteMessage f = new IncomingPromoteDemoteMessage(); // JUST FOR DEBUG
+                    f.newUserMode = UserMode.OWNER; // JUST FOR DEBUG
+                })
+                .match(RemoveFromChannelMessage.class, rmMsg -> {
+                    router = router.removeRoutee(sender());
                 }).build();
+    }
+
+    private void killChannel() {
+        KillChannelMessage klChMsg = new KillChannelMessage();
+        klChMsg.channelName = channelName;
+
+        router.route(akka.actor.PoisonPill.getInstance(), self());
+
+        getContext().parent().tell(klChMsg, self());
     }
 
     private void broadcastMessage(String message) {

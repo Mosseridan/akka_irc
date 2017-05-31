@@ -39,7 +39,7 @@ public class ServerUserActor extends AbstractActor {
                 .match(JoinMessage.class, joinMsg -> {
 
                     // get child by channel name
-                    ActorSelection sel = getContext().actorSelection(joinMsg.channelName);
+                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + joinMsg.channelName);
                     ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
                     // create the child if it doesn't exist
@@ -56,6 +56,9 @@ public class ServerUserActor extends AbstractActor {
 
                     leaveChMsg.leavingUserName = userName;
                     userChannel.forward(leaveChMsg, getContext());
+
+                    //userChannel.tell(akka.actor.PoisonPill.getInstance(), self());
+                    //getContext().stop(userChannel);
                 })
                 .match(OutgoingBroadcastMessage.class, outBrdMsg -> {
                     ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + outBrdMsg.toChannel);
@@ -93,20 +96,26 @@ public class ServerUserActor extends AbstractActor {
                     ActorSelection sel = getContext().actorSelection(prmDemUsrMsg.channel);
                     ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-                    userChannel.forward(prmDemUsrMsg, getContext());
-                })
-                .match(KickMessage.class, kckMsg -> {
-                    ActorSelection sel = getContext().actorSelection(kckMsg.channel);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    if (userChannel != null) { // user exists
-                        userChannel.forward(kckMsg, getContext());
-                    } else { // cannot kick if not in channel
-                        tellClientSystem("Cannot kick, you are not in this channel");
+                    if (userChannel != null) {
+                        userChannel.forward(prmDemUsrMsg, getContext());
+                    } else {
+                        tellClientSystem("Such channel does not exist");
                     }
                 })
                 .match(GotKickedMessage.class, gotKckMsg -> {
                     sender().tell(akka.actor.PoisonPill.getInstance(), self());
+                })
+                .match(KillChannelMessage.class, klChMsg -> {
+                    ActorSelection sel = getContext().actorSelection(klChMsg.channelName);
+                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+
+                    klChMsg.killer = userName;
+
+                    if (userChannel != null) {
+                        userChannel.forward(klChMsg, getContext());
+                    } else {
+                        tellClientSystem("Cannot disband channel that does not exist");
+                    }
                 })
                 .build();
     }
