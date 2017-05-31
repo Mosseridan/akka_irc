@@ -10,105 +10,133 @@ public class ServerUserActor extends AbstractActor {
     final String serverUserPath = "/user/Server/ServerUser";
     final String channelCreatorPath = "/user/Server/ChannelCreator";
 
-    public ServerUserActor(String username) {
+    public ServerUserActor(String username, ActorRef clientUserActor) {
         this.userName = username;
+        this.clientUserActor = clientUserActor;
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(OutgoingPrivateMessage.class, txtMsg -> { // send a message to another actor
-                    ActorSelection serverActorSel = getContext().actorSelection(serverUserPath + txtMsg.sendTo);
-                    ActorRef serverUserActor = HelperFunctions.getActorRefBySelection(serverActorSel);
+        .match(OutgoingPrivateMessage.class, msg -> { // send a message to another actor
+            ActorSelection serverActorSel = getContext().actorSelection(serverUserPath + msg.userName);
+            ActorRef serverUserActor = HelperFunctions.getActorRefBySelection(serverActorSel);
 
-                    if (serverUserActor != null) {
+            if (serverUserActor != null) {
+                serverUserActor.tell(new IncomingPrivateMessage(msg.sender,msg.message), self());
+            } else {
+                tellClientSystem("Did not send \"" + msg.message + "\". User \"" +  msg.userName + "\" does not exist.");
+            }
+        })
+        .match(IncomingPrivateMessage.class, msg -> {
+            tellClient("<" + msg.sender + "> " + msg.message);
+        })
+        .match(JoinMessage.class, msg -> {
+            // get child by channel name
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            // create the child if it doesn't exist
+            if (userChannel == null)  {
+                userChannel = getContext().actorOf(Props.create(ServerUserChannelActor.class, msg.userName, clientUserActor, msg.channel), msg.channel);
+            }
+            // try joining the channel
+            userChannel.forward(msg, getContext());
+        })
+        .match(LeaveMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
 
-                        IncomingPrivateMessage incomingTxtMsg = new IncomingPrivateMessage();
-                        incomingTxtMsg.sentFrom = userName;
-                        incomingTxtMsg.text = txtMsg.text;
-
-                        serverUserActor.tell(incomingTxtMsg, self());
-                    } else {
-                        tellClientSystem("User " +  txtMsg.sendTo + " does not exist");
-                    }
-                })
-                .match(IncomingPrivateMessage.class, incTxtMsg -> {
-                    tellClient("{" + incTxtMsg.sentFrom + "}: "+ incTxtMsg.text);
-                })
-
-                .match(JoinMessage.class, joinMsg -> {
-
-                    // get child by channel name
-                    ActorSelection sel = getContext().actorSelection(joinMsg.channelName);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    // create the child if it doesn't exist
-                    if (userChannel == null)  {
-                        userChannel = getContext().actorOf(Props.create(ServerUserChannelActor.class, userName, joinMsg.channelName, clientUserActor), joinMsg.channelName);
-                    }
-
-                    // try joining the channel
-                    userChannel.forward(joinMsg, getContext());
-                })
-                .match(LeaveChannelMessage.class, leaveChMsg -> {
-                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + leaveChMsg.channelToLeave);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    leaveChMsg.leavingUserName = userName;
-                    userChannel.forward(leaveChMsg, getContext());
-                })
-                .match(OutgoingBroadcastMessage.class, outBrdMsg -> {
-                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + outBrdMsg.toChannel);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    if (userChannel != null) {
-                        outBrdMsg.sentFrom = userName;
-                        userChannel.tell(outBrdMsg, self());
-                    } else { // not in this channel
-                        tellClientSystem("Not in channel, can't send.");
-                    }
-                })
-                .match(ChangeTitleMessage.class, chTlMsg -> {
-                    ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + chTlMsg.channelForTitleChange);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    userChannel.forward(chTlMsg, getContext());
-                })
-                .match(GetChannelListMessage.class, getChLstMsg -> {
-                    ActorSelection sel = getContext().getSystem().actorSelection(channelCreatorPath);
-                    ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
-                    // get list
-                    channelCreator.forward(getChLstMsg, getContext());
-                })
-                .match(GetUserListInChannelMessage.class, getUlChMsg -> {
-                    ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + getUlChMsg.channelName);
-                    ActorRef channel = HelperFunctions.getActorRefBySelection(sel);
-
-                    channel.forward(getUlChMsg, getContext());
-                })
-                .match(ConnectMessage.class, connMsg -> {
-                    clientUserActor = connMsg.clientUserActor;
-                })
-                .match(OutgoingPromoteDemoteMessage.class, prmDemUsrMsg -> {
-                    ActorSelection sel = getContext().actorSelection(prmDemUsrMsg.channel);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    userChannel.forward(prmDemUsrMsg, getContext());
-                })
-                .match(KickMessage.class, kckMsg -> {
-                    ActorSelection sel = getContext().actorSelection(kckMsg.channel);
-                    ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-
-                    if (userChannel != null) { // user exists
-                        userChannel.forward(kckMsg, getContext());
-                    } else { // cannot kick if not in channel
-                        tellClientSystem("Cannot kick, you are not in this channel");
-                    }
-                })
-                .match(GotKickedMessage.class, gotKckMsg -> {
-                    sender().tell(akka.actor.PoisonPill.getInstance(), self());
-                })
-                .build();
+            if(userChannel != null) {
+                userChannel.forward(msg, getContext());
+            } else {
+                tellClientSystem("Did not leave channel \"" + msg.channel + "\". You are not in this channel");
+            }
+        })
+        .match(OutgoingBroadcastMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) {
+                userChannel.forward(msg, getContext());
+            } else { // not in this channel
+                tellClientSystem("Did not send \"" + msg.message + "\" to channel \"" +  msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(ChangeTitleMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) {
+                userChannel.forward(msg, getContext());
+            } else { // not in this channel
+                tellClientSystem("Did not change title to \"" + msg.newTitle + "\" in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingKickMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not kick user \"" + msg.userName + "\" from channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingBanMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not Ban user \"" + msg.userName + "\" from channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingAddVoicedMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not make user \"" + msg.userName + "\" voiced, in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingAddOperatorMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not make user \"" + msg.userName + "\" operator, in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingRemoveVoicedMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not remove voiced rights from user \"" + msg.userName + "\" in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(OutgoingRemoveOperatorMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else { // cannot kick if not in channel
+                tellClientSystem("Did not remove operator rights from user \"" + msg.userName + "\" in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+//        .match(OutgoingPromoteDemoteMessage.class, prmDemUsrMsg -> {
+//            ActorSelection sel = getContext().actorSelection(prmDemUsrMsg.channel);
+//            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+//
+//            userChannel.forward(prmDemUsrMsg, getContext());
+//        })
+//        .match(IncomingKickMessage.class, msg -> {
+//            sender().tell(akka.actor.PoisonPill.getInstance(), self());
+//        })
+//        .match(SetChannelListMessage.class, setChLstMsg -> {
+//            clientUserActor.tell(setChLstMsg, self());
+//        })
+        .build();
     }
 
     private void tellClient(String message) {

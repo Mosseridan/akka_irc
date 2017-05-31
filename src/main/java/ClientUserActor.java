@@ -3,14 +3,11 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
 public class ClientUserActor extends AbstractActor {
     String userName;
     ActorRef serverUserActor;
     ChatWindow chatWindow;
-    String currentChannel;
+    public String currentChannel;
 
     public ClientUserActor(String userName, ChatWindow chatWindow) {
         this.userName = userName;
@@ -22,42 +19,67 @@ public class ClientUserActor extends AbstractActor {
         return receiveBuilder()
                 .match(GUIMessage.class, msg -> {
                     handleTextCommand(msg.text);
-
-                }).match(ConnectMessage.class, connMessage -> {
-                    serverUserActor = connMessage.serverUserActor;
+                })
+                .match(String.class, msg -> {
+                    chatWindow.printText(msg);
+                })
+                .match(TextMessage.class, msg -> {
+                    chatWindow.printText(msg.channel,msg.message);
+                })
+                .match(ConnectMessage.class, msg -> {
+                    serverUserActor = msg.serverUserActor;
                     if (serverUserActor != null) {
-                        printText("SYSTEM: {" + userName + "} Connected successfully.");
+                        chatWindow.printText("<" + userName + "> Connected successfully.");
+                    }else {
+                        chatWindow.printText("Something went wrong while connecting.");
                     }
-
-                }).match(String.class, str -> printText(str)
-
-                ).match(JoinApprovalMessage.class, joinAppMsg -> {
-
-                    if (joinAppMsg.mode == UserMode.USER) {
-                        printText("SYSTEM: Successfully joined channel <" + joinAppMsg.joinedChannelName + ">.");
-                    } else if (joinAppMsg.mode == UserMode.OWNER) {
-                        printText("SYSTEM: Successfully created channel <" + joinAppMsg.joinedChannelName + ">.");
+                })
+                .match(JoinApprovalMessage.class, msg -> { //TODO: ADD JOINED CHANNEL INDICATION
+                    chatWindow.addChannel(msg.channelName,msg.channelUsers);
+                    if (msg.mode == UserMode.OWNER) {
+                        chatWindow.printText(msg.channelName, "*** Created channel: " + msg.channelName);
                     }
-                    currentChannel = joinAppMsg.joinedChannelName;
+                    chatWindow.printText(msg.channelName, "*** joins: " + msg.userName);
+                    currentChannel = msg.channelName;
+                    //chatWindow.setUserList(msg.channelName, msg.channelUsers);
+                    chatWindow.setTitle("User: " + userName + ", Channel: " + msg.channelName);
                 })
-                .match(GetChannelListMessage.class, getChLstMsg -> {
-                    serverUserActor.tell(getChLstMsg, self());
+                .match(LeaveMessage.class, msg -> {
+                    chatWindow.printText(msg.channel, "*** parts: " + msg.userName);
+                    //TODO
                 })
-                .match(SetChannelListMessage.class, setChLstMsg -> {
-                    chatWindow.channels = setChLstMsg.channels;
-                    //chatWindow.textPaneChannelList
-                    //chLstMsg.channels;
+                .match(UserJoinedMessage.class, msg -> {
+                    chatWindow.addUser(msg.channel,userName);
+                    chatWindow.printText(msg.channel, "*** joins: " + msg.userName);
                 })
-                .match(GetUserListInChannelMessage.class, getUlstChMsg -> {
-                    serverUserActor.tell(getUlstChMsg, self());
+                .match(UserLeftMessage.class, msg-> {
+                    chatWindow.removeUser(msg.channel, msg.userName);
+                    chatWindow.printText(msg.channel, "*** parts: " + msg.userName);
                 })
-                .match(SetUserListInChannelMessage.class, setULstChMsg -> {
-                    // append to user list text pane (lock)
-                    //chatWindow.textPaneUsersInChannelList
-                    chatWindow.usersInChannel.add(setULstChMsg.user);
-                    //ulChMsg.users
-                    //ulChMsg
+                .match(SetUserListMessage.class, msg->{
+                    chatWindow.setUserList(msg.channel, msg.userList);
                 })
+//                .match(GetChannelListMessage.class, getChLstMsg -> {
+//                    serverUserActor.tell(getChLstMsg, self());
+//                })
+//                .match(SetChannelListMessage.class, setChLstMsg -> {
+//                    System.out.println("!!!! got SetChannelListMessage");
+//                    printText("!!!! got SetChannelListMessage");
+//                   // printText(setChLstMsg.channels);
+//                    //chatWindow.setChannels(setChLstMsg.channels);
+//                })
+//                .match(GetUserListInChannelMessage.class, getUlstChMsg -> {
+//                    System.out.println("! got GetUserListInChannelMessage");
+//                    serverUserActor.tell(getUlstChMsg, self());
+//                })
+//                .match(SetUserListInChannelMessage.class, setULstChMsg -> {//TODO: FIX THIS
+//                    System.out.println("! got SetUserListInChannelMessage");
+//                    // append to user list text pane (lock)
+//                    //chatWindow.textPaneUsersInChannelList
+//                    //chatWindow.usersInChannel.add(setULstChMsg.user);
+//                    //ulChMsg.users
+//                    //ulChMsg
+//                })
                 .build();
     }
 
@@ -71,10 +93,7 @@ public class ClientUserActor extends AbstractActor {
                 .actorSelection("akka.tcp://IRC@127.0.0.1:2552/user/Server");
 
         // Send a connect request to the server
-        ConnectMessage connMsg = new ConnectMessage();
-        connMsg.userName = userName;
-
-        server.tell(connMsg, self());
+        server.tell(new ConnectMessage(userName), self());
 
 //        final Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
 //        Future<Object> ft = Patterns.ask(server, connMsg, timeout);
@@ -124,89 +143,52 @@ public class ClientUserActor extends AbstractActor {
         String cmd = cmdArr[0];
         verifyFormat(cmdArr);
         if (cmd.equals("/w")) { // normal user
-
-            OutgoingPrivateMessage txtMsg = new OutgoingPrivateMessage();
-            txtMsg.sendTo = cmdArr[1];
-            txtMsg.text = text.split(cmdArr[1], 2)[1];
-
-            serverUserActor.tell(txtMsg, self());
+            serverUserActor.forward(new OutgoingPrivateMessage(cmdArr[1], userName, text.split(cmdArr[1], 2)[1]), getContext());
 
         } else if (cmd.equals("/join")) {
-            JoinMessage joinMsg = new JoinMessage();
-            joinMsg.channelName = cmdArr[1];
-
-            serverUserActor.tell(joinMsg, self());
+            serverUserActor.forward(new JoinMessage(userName,cmdArr[1]), getContext());
 
         } else if (cmd.equals("/leave")) {
-            LeaveChannelMessage leaveMsg = new LeaveChannelMessage();
-            leaveMsg.channelToLeave = cmdArr[1];
-
-            serverUserActor.tell(leaveMsg, self());
+            serverUserActor.forward(new LeaveMessage(userName ,cmdArr[1]), getContext());
 
         } else if (cmd.equals("/title")) { // Voiced user
-            ChangeTitleMessage chTlMsg = new ChangeTitleMessage();
-            chTlMsg.channelForTitleChange = cmdArr[1];
-            chTlMsg.newTitle = cmdArr[2];
-
-            serverUserActor.tell(chTlMsg, self());
+            serverUserActor.forward(new ChangeTitleMessage(cmdArr[2],cmdArr[1]), getContext());
 
         } else if (cmd.equals("/kick")) { // Channel operator
-            OutgoingPromoteDemoteMessage proDemoMsg = new OutgoingPromoteDemoteMessage();
-            proDemoMsg.userMode = UserMode.OUT;
-            proDemoMsg.promotedDemotedUser = cmdArr[1];
-            proDemoMsg.channel = cmdArr[2];
+            serverUserActor.forward(new OutgoingKickMessage(cmdArr[1],userName,cmdArr[2]), getContext());
 
-            serverUserActor.tell(proDemoMsg, self());
         } else if (cmd.equals("/ban")) {
-            OutgoingPromoteDemoteMessage proDemoMsg = new OutgoingPromoteDemoteMessage();
+            serverUserActor.forward(new OutgoingBanMessage(cmdArr[1],userName,cmdArr[2]), getContext());
 
-            proDemoMsg.userMode = UserMode.BANNED;
-            proDemoMsg.promotedDemotedUser = cmdArr[1];
-            proDemoMsg.channel = cmdArr[2];
-
-            serverUserActor.tell(proDemoMsg, self());
         } else if (cmd.equals("/add")) {
-            OutgoingPromoteDemoteMessage proDemoMsg = new OutgoingPromoteDemoteMessage();
             if (cmdArr[2].equals("v")) {
-                proDemoMsg.userMode = UserMode.VOICE;
+                serverUserActor.forward(new OutgoingAddVoicedMessage(cmdArr[3], userName,cmdArr[1]), getContext());
             } else if (cmdArr[2].equals("op")) {
-                proDemoMsg.userMode = UserMode.OPERATOR;
-            }
-            proDemoMsg.channel = cmdArr[1];
-            proDemoMsg.promotedDemotedUser = cmdArr[3];
+                serverUserActor.forward(new OutgoingAddOperatorMessage(cmdArr[3], userName,cmdArr[1]), getContext());
 
-            serverUserActor.tell(proDemoMsg, self());
+            } else {
+                chatWindow.invalidSyntax(text);
+            }
 
         } else if (cmd.equals("/remove")) {
-            OutgoingPromoteDemoteMessage proDemoMsg = new OutgoingPromoteDemoteMessage();
-            proDemoMsg.userMode = UserMode.USER;
-            proDemoMsg.channel = cmdArr[1];
-            proDemoMsg.promotedDemotedUser = cmdArr[3];
-
-            serverUserActor.tell(proDemoMsg, self());
+            if (cmdArr[2].equals("v")) {
+                serverUserActor.forward(new OutgoingRemoveVoicedMessage(cmdArr[3], userName,cmdArr[1]), getContext());
+            } else if (cmdArr[2].equals("op")) {
+                serverUserActor.forward(new OutgoingRemoveOperatorMessage(cmdArr[3], userName,cmdArr[1]), getContext());
+            } else {
+                chatWindow.invalidSyntax(text);
+            }
 
         } else if (cmd.equals("/to")) { // /to CHANNEL "Message"
             // send to a specific channel! BONUS FEATURE
             // also changes the current channel to the last one,
             // so further messages to the same one would not precede with "/to CHANNEL MESSAGE" format
-            OutgoingBroadcastMessage outBrdMsg = new OutgoingBroadcastMessage();
-            outBrdMsg.toChannel = cmdArr[1];
             currentChannel = cmdArr[1];
-            outBrdMsg.text = text.split(cmdArr[1], 2)[1];
+            serverUserActor.forward(new OutgoingBroadcastMessage(userName, cmdArr[1], text.split(cmdArr[1], 2)[1]), getContext());
 
-            serverUserActor.tell(outBrdMsg, self());
         } else { // broadcast text message
-            OutgoingBroadcastMessage outBrdMsg = new OutgoingBroadcastMessage();
-            outBrdMsg.text = text;
-            outBrdMsg.toChannel = currentChannel;
+            serverUserActor.forward(new OutgoingBroadcastMessage(userName, currentChannel, text), getContext());
 
-            serverUserActor.tell(outBrdMsg, self());
         }
     }
-
-    private void printText(String text) {
-        String message = "[" + LocalTime.now().toString() + "] " + text + "\n";
-        chatWindow.textAreaOutput.append(message);
-    }
-
 }
