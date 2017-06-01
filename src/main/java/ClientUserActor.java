@@ -80,18 +80,6 @@ public class ClientUserActor extends AbstractActor {
                     }
                     chatWindow.removeChannel(msg.channel);
                 })
-//                .match(IncomingAddVoicedMessage.class, msg -> {
-//                    //TODO
-//                })
-//                .match(IncomingRemoveVoicedMessage.class, msg -> {
-//                    //TODO
-//                })
-//                .match(IncomingAddOperatorMessage.class, msg -> {
-//                    //TODO
-//                })
-//                .match(IncomingRemoveOperatorMessage.class, msg -> {
-//                    //TODO
-//                })
                 .match(GetContentMessage.class, msg ->{
                     serverUserActor.forward(msg,getContext());
                 })
@@ -112,6 +100,10 @@ public class ClientUserActor extends AbstractActor {
                         chatWindow.printText("*** parts: " + msg.userName);
                     }
                 })
+                .match(ExitMessage.class, msg -> {
+                    serverUserActor.tell(msg,self());
+                    self().tell(akka.actor.PoisonPill.getInstance(), self());
+                })
                 .build();
     }
 
@@ -120,7 +112,7 @@ public class ClientUserActor extends AbstractActor {
     boolean verifyFormat(String[] arr) {
         boolean isFormatValid = false;
 
-        if (arr[0].equals("/join") || arr[0].equals("/leave")) {
+        if (arr[0].equals("/join") || arr[0].equals("/leave") || arr[0].equals("/disband")) {
             if (arr.length == 2) {
                 isFormatValid = true;
             }
@@ -153,7 +145,6 @@ public class ClientUserActor extends AbstractActor {
         if(!verifyFormat(cmdArr)) return;
         if (cmd.equals("/w")) { // normal user
             serverUserActor.forward(new OutgoingPrivateMessage(cmdArr[1], userName, text.split(cmdArr[1], 2)[1]), getContext());
-
         } else if (cmd.equals("/join")) {
             serverUserActor.forward(new JoinMessage(userName,cmdArr[1]), getContext());
 
@@ -193,12 +184,10 @@ public class ClientUserActor extends AbstractActor {
             // also changes the current channel to the last one,
             // so further messages to the same one would not precede with "/to CHANNEL MESSAGE" format
            // currentChannelName = cmdArr[1];
-
-            serverUserActor.forward(new OutgoingBroadcastMessage(userName, cmdArr[1], text.split(cmdArr[1], 2)[1]), getContext());
-
+        } else if (cmd.equals("/disband")) {
+            serverUserActor.tell(new KillChannelMessage(cmdArr[1],userName), self());
         } else { // broadcast text message
             serverUserActor.forward(new OutgoingBroadcastMessage(userName, currentChannelName, text), getContext());
-
         }
     }
 }

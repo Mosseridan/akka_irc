@@ -103,7 +103,7 @@ public class ChatWindow extends Application{
 
     private void paintChatWindow() {
         stage.setTitle("UserName: " + this.userName);
-
+        stage.setOnCloseRequest(e -> doExit());
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
 
@@ -245,6 +245,6 @@ public class ChatWindow extends Application{
     }
 
     public void doExit(){
-        //TODO
+        clientUserActor.tell(new ExitMessage(),clientUserActor);
     }
 }

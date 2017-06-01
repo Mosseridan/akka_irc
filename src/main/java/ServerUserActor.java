@@ -133,18 +133,20 @@ public class ServerUserActor extends AbstractActor {
                 tellClientSystem("Could not get content for channel \"" + msg.channel + "\". You are not in this channel.");
             }
         })
-//        .match(OutgoingPromoteDemoteMessage.class, prmDemUsrMsg -> {
-//            ActorSelection sel = getContext().actorSelection(prmDemUsrMsg.channel);
-//            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
-//
-//            userChannel.forward(prmDemUsrMsg, getContext());
-//        })
-//        .match(IncomingKickMessage.class, msg -> {
-//            sender().tell(akka.actor.PoisonPill.getInstance(), self());
-//        })
-//        .match(SetChannelListMessage.class, setChLstMsg -> {
-//            clientUserActor.tell(setChLstMsg, self());
-//        })
+        .match(KillChannelMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channelName);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) {
+                userChannel.forward(msg, getContext());
+            } else {
+                tellClientSystem("Cannot disband channel that does not exist");
+            }
+        })
+        .match(ExitMessage.class, msg ->{
+            getContext().getChildren().forEach(channelUserActor ->
+                channelUserActor.tell(msg,self()));
+            self().tell(akka.actor.PoisonPill.getInstance(), self());
+        })
         .build();
     }
 

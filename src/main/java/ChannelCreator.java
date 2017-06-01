@@ -19,6 +19,12 @@ public class ChannelCreator extends AbstractActor {
                     //.withMailbox("akka.dispatch.UnboundedMailbox"));
             sender().tell(msg,self());
             //channelToJoin.forward(joinMessage, getContext());
-        }).build();
+        })
+        .match(KillChannelMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channelName);
+            ActorRef channelToKill = HelperFunctions.getActorRefBySelection(sel);
+            channelToKill.forward(akka.actor.PoisonPill.getInstance(), getContext());
+        })
+        .build();
     }
 }

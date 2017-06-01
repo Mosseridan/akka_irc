@@ -383,7 +383,21 @@ public class ServerUserChannelActor extends AbstractActor {
                 userName = "$" + userName;
             }
             msg.userName = userName;
-            channelRef.forward(msg,getContext());
+            ActorSelection sel = getContext().actorSelection(channelCreatorPath + "/" + channelName);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if(userChannel != null)
+                userChannel.forward(msg,getContext());
+        })
+        .match(KillChannelMessage.class, msg -> {
+            if (userMode == UserMode.OWNER) {
+                msg.killer = userName;
+                if(channelRef != null)
+                    channelRef.tell(msg, self());
+            }
+        })
+        .match(ExitMessage.class, msg -> {
+            channelRef.tell(new LeaveMessage(userName, userMode, channelName), self());
+            self().tell(akka.actor.PoisonPill.getInstance(), self());
         })
         .build();
     }

@@ -4,7 +4,10 @@ import Shared.Messages.*;
 import akka.routing.ActorRefRoutee;
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Router;
-
+import akka.actor.Terminated;
+import akka.routing.*;
+import scala.collection.IndexedSeq;
+import scala.collection.Traversable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,13 +55,14 @@ public class ChannelActor extends AbstractActor {
                     //broadcastMessage();
                     // arbitrarily select another owner
                     if (router.routees().isEmpty()){
-                        //Todo: kill channel actor
+                        killChannel();
                     }
                     else if (msg.userMode == UserMode.OWNER) {
                         router.routees().head().send(new BecomeOwnerMessage(channelName), self());
                         broadcastMessage("*** " + msg.userName + "became owener");
                         router.route(new SetUserListMessage(channelName,userList),self());
                     }
+                    sender().tell(akka.actor.PoisonPill.getInstance(), self());
                 })
                 .match(OutgoingBroadcastMessage.class, msg -> {
                     broadcastMessage("<" + msg.sender + "> " + msg.message);
@@ -103,12 +107,19 @@ public class ChannelActor extends AbstractActor {
                 .match(GetContentMessage.class, msg->{
                     sender().forward(new SetContentMessage(channelName, userList, conversasion),getContext());
                 })
+                .match(KillChannelMessage.class, msg -> {
+                    broadcastMessage("*** Owner <" + msg.killer + "> disbands channel "+ msg.channelName +" . closing");
+                    killChannel();
+                })
+//                 .match(Terminated.class, message -> {
+//                    //router = router.removeRoutee(message.actor());
+//                    IncomingPromoteDemoteMessage f = new IncomingPromoteDemoteMessage(); // JUST FOR DEBUG
+//                    f.newUserMode = UserMode.OWNER; // JUST FOR DEBUG
+//                })
                 .build();
     }
 
     private void broadcastMessage(String message) {
-//        IncomingBroadcastTextMessage incBrdTxtMsg = new IncomingBroadcastTextMessage();
-//        incBrdTxtMsg.text = "<" + channelName + (title != null ? ": ~" + title : "") + "> " + message;
         router.route(new IncomingBroadcastMessage(channelName, message), self());
         record(message);
     }
@@ -117,5 +128,10 @@ public class ChannelActor extends AbstractActor {
         if(conversasion.length() > 2048)
             conversasion = conversasion.substring(1024);
         conversasion = conversasion + message +"\n";
+    }
+
+    private void killChannel() {
+        router.route(akka.actor.PoisonPill.getInstance(), self());
+        self().tell(akka.actor.PoisonPill.getInstance(), self());
     }
 }
