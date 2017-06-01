@@ -1,22 +1,12 @@
 
 import Shared.Messages.ConnectMessage;
-import Shared.Messages.IncomingPrivateMessage;
-import Shared.Messages.SetChannelListMessage;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.Props;
-import akka.routing.ActorRefRoutee;
-import akka.routing.BroadcastRoutingLogic;
-import akka.routing.Router;
-import javafx.scene.control.TreeItem;
 
 public class ServerActor extends AbstractActor {
 
     final String channelCreatorPath = "/user/Server/ChannelCreator";
-//    Router router;
-//    TreeItem<String> allUsersBranch;
-//    TreeItem<String> channelsAndUsersTree;
 
     @Override
     public Receive createReceive() {
@@ -31,19 +21,6 @@ public class ServerActor extends AbstractActor {
 
                     connMsg.serverUserActor = serverUserActor;
                     clientUserActor.tell(connMsg, self());
-
-//                    router = router.addRoutee(new ActorRefRoutee(clientUserActor));
-//                    //router = router.addRoutee(new ActorRefRoutee(serverUserActor));
-//                    makeBranch(connMsg.userName, allUsersBranch);
-//                    router.route(new SetChannelListMessage("WTF???"), self());
-//                    router.route("WTF?????", self());
-
-//                    // tell the channel creator to send the user the channel list
-//                    ActorSelection sel = getContext().actorSelection(channelCreatorPath);
-//                    ActorRef channelCreator = HelperFunctions.getActorRefBySelection(sel);
-//
-//                    GetChannelListMessage chLstMsg = new GetChannelListMessage();
-//                    channelCreator.forward(chLstMsg, getContext());
                 })
                 .build();
     }

@@ -19,20 +19,6 @@ public class ChannelCreator extends AbstractActor {
                     //.withMailbox("akka.dispatch.UnboundedMailbox"));
             sender().tell(msg,self());
             //channelToJoin.forward(joinMessage, getContext());
-
-//        })
-//
-//        .match(GetChannelListMessage.class, chLstMsg -> {
-//            // Preferring that ChannelCreator will send all the users the channels list,
-//            // instead of making all the channels send its name to every user.
-//            Iterable<ActorRef> children = getContext().getChildren();
-//            List<String> channelNames = new LinkedList<>();
-//            children.forEach(childChannel -> channelNames.add(childChannel.toString()));
-//
-//            SetChannelListMessage setChLstMsg = new SetChannelListMessage();
-//            setChLstMsg.channels = channelNames;
-//            sender().tell(setChLstMsg, self());
-
         }).build();
     }
 }

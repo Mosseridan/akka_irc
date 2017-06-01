@@ -2,76 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="24e56ea3-a2a4-4b2c-aae8-83735ce1219a" name="Default" comment="basic functionallity works">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/ChannelScene.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingAddOperatorMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingAddVoicedMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBanMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBroadcastMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingKickMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingRemoveOperatorMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingRemoveVoicedMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/LeaveMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingAddOperatorMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingAddVoicedMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingBanMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingKickMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingRemoveOperatorMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingRemoveVoicedMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/TextMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/UserJoinedMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/UserLeftMessage.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/ChatWindow.form" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBroadcastTextMessage.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/LeaveChannelMessage.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/ChatWindow$1.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/ChatWindow$2.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/ChatWindow$3.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/IncomingBroadcastTextMessage.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/LeaveChannelMessage.class" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/GetContentMessage.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetContentMessage.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/GetChannelListMessage.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/GetUserListInChannelMessage.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingPromoteDemoteMessage.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPromoteDemoteMessage.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetChannelListMessage.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListInChannelMessage.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ChannelActor.class" afterPath="$PROJECT_DIR$/target/classes/ChannelActor.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ChannelCreator.class" afterPath="$PROJECT_DIR$/target/classes/ChannelCreator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ChannelScene.class" afterPath="$PROJECT_DIR$/target/classes/ChannelScene.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ChatWindow.class" afterPath="$PROJECT_DIR$/target/classes/ChatWindow.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ClientUserActor.class" afterPath="$PROJECT_DIR$/target/classes/ClientUserActor.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Main$Terminator.class" afterPath="$PROJECT_DIR$/target/classes/Main$Terminator.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ServerActor.class" afterPath="$PROJECT_DIR$/target/classes/ServerActor.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ServerUserActor.class" afterPath="$PROJECT_DIR$/target/classes/ServerUserActor.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ServerUserChannelActor.class" afterPath="$PROJECT_DIR$/target/classes/ServerUserChannelActor.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/ChangeTitleMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/ChangeTitleMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/ConnectMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/ConnectMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/GUIMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/GUIMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/IncomingPrivateMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/IncomingPrivateMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/IncomingPromoteDemoteMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/IncomingPromoteDemoteMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/JoinApprovalMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/JoinApprovalMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/JoinMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/JoinMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/KickMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/KickMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingBroadcastMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingBroadcastMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingPrivateMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingPrivateMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingPromoteDemoteMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/OutgoingPromoteDemoteMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/SetChannelListMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/SetChannelListMessage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Shared/Messages/BecomeOwnerMessage.class" afterPath="$PROJECT_DIR$/target/classes/Shared/Messages/BecomeOwnerMessage.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/akka-sample-main-java.iml" afterPath="$PROJECT_DIR$/akka-sample-main-java.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ChannelActor.java" afterPath="$PROJECT_DIR$/src/main/java/ChannelActor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ChannelCreator.java" afterPath="$PROJECT_DIR$/src/main/java/ChannelCreator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ChannelScene.java" afterPath="$PROJECT_DIR$/src/main/java/ChannelScene.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ChatWindow.java" afterPath="$PROJECT_DIR$/src/main/java/ChatWindow.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ClientUserActor.java" afterPath="$PROJECT_DIR$/src/main/java/ClientUserActor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ServerActor.java" afterPath="$PROJECT_DIR$/src/main/java/ServerActor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ServerUserActor.java" afterPath="$PROJECT_DIR$/src/main/java/ServerUserActor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java" afterPath="$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/ChangeTitleMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/ChangeTitleMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/ConnectMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/ConnectMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/GUIMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/GUIMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingPrivateMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingPrivateMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingPromoteDemoteMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingPromoteDemoteMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/JoinApprovalMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/JoinApprovalMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/JoinMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/JoinMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/KickMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/KickMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingBroadcastMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingBroadcastMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPrivateMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPrivateMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPromoteDemoteMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPromoteDemoteMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetChannelListMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/SetChannelListMessage.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java" afterPath="$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -82,6 +37,9 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/akka_sample_main_java$Main.coverage" NAME="Main Coverage Results" MODIFIED="1496304385197" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>sample.hello.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/akka_sample_main_java$ChatWindow.coverage" NAME="ChatWindow Coverage Results" MODIFIED="1495700700594" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>sample.hello.*</FILTER>
     </SUITE>
@@ -95,41 +53,8 @@
       <file leaf-file-name="ChatWindow.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/ChatWindow.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="137" column="18" lean-forward="false" selection-start-line="137" selection-start-column="18" selection-end-line="137" selection-end-column="18" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="method#paintLoginWindow#0;class#ChatWindow#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ChoiceBox.java" pinned="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/javafx-src.zip!/javafx/scene/control/ChoiceBox.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9306">
-              <caret line="336" column="19" lean-forward="false" selection-start-line="336" selection-start-column="19" selection-end-line="336" selection-end-column="19" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Iterable.java" pinned="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/lang/Iterable.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1551">
-              <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ChannelScene.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/ChannelScene.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="14" column="15" lean-forward="false" selection-start-line="14" selection-start-column="15" selection-end-line="14" selection-end-column="15" />
+            <state relative-caret-position="318">
+              <caret line="235" column="28" lean-forward="false" selection-start-line="235" selection-start-column="28" selection-end-line="235" selection-end-column="28" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -140,28 +65,8 @@
       <file leaf-file-name="ServerUserActor.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserActor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="429">
-              <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ClientUserActor.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/ClientUserActor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1617">
-              <caret line="52" column="11" lean-forward="false" selection-start-line="52" selection-start-column="11" selection-end-line="52" selection-end-column="11" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="HelperFunctions.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/HelperFunctions.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
-              <caret line="14" column="34" lean-forward="false" selection-start-line="14" selection-start-column="34" selection-end-line="14" selection-end-column="34" />
+            <state relative-caret-position="-375">
+              <caret line="18" column="22" lean-forward="true" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -170,8 +75,38 @@
       <file leaf-file-name="ChannelActor.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/ChannelActor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1023">
-              <caret line="39" column="20" lean-forward="false" selection-start-line="39" selection-start-column="20" selection-end-line="39" selection-end-column="20" />
+            <state relative-caret-position="171">
+              <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ClientUserActor.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/ClientUserActor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="171">
+              <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ActorCell.class" pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1.jar!/akka/actor/ActorCell.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="148">
+              <caret line="647" column="0" lean-forward="false" selection-start-line="647" selection-start-column="0" selection-end-line="647" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Mailbox.class" pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1.jar!/akka/dispatch/Mailbox.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="160">
+              <caret line="299" column="0" lean-forward="false" selection-start-line="299" selection-start-column="0" selection-end-line="299" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -180,18 +115,8 @@
       <file leaf-file-name="ServerUserChannelActor.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16137">
-              <caret line="495" column="64" lean-forward="false" selection-start-line="495" selection-start-column="64" selection-end-line="495" selection-end-column="64" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TextMessage.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/TextMessage.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="6" column="11" lean-forward="false" selection-start-line="6" selection-start-column="11" selection-end-line="6" selection-end-column="11" />
+            <state relative-caret-position="231">
+              <caret line="63" column="35" lean-forward="false" selection-start-line="63" selection-start-column="35" selection-end-line="63" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -203,20 +128,12 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="JavaFXApplication" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>GetChannelListMessage</find>
-      <find>JoinApprovalMessage</find>
-      <find>Props.create</find>
-      <find>getItems</find>
-      <find>Incom</find>
-      <find>getKickedFromChannel</find>
-      <find>LeaveChannelMessage</find>
-      <find>title</find>
-      <find>wro</find>
       <find>LeaveMessage</find>
       <find>kick</find>
       <find>kic</find>
@@ -238,6 +155,15 @@
       <find>stage</find>
       <find>printText</find>
       <find>is</find>
+      <find>loginScene</find>
+      <find>sendIn</find>
+      <find>currentChannel</find>
+      <find>Owner</find>
+      <find>BecomeOwnerMessage</find>
+      <find>inc</find>
+      <find>addC</find>
+      <find>lea</find>
+      <find>equals</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -251,17 +177,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/UserListInChannelMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/GotKickedMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/Shared/SetUserListInChannelMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/GetChannelListMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/GetUserListInChannelMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListInChannelMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/ChatWindow.form" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/SetChannelListMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/GUIMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/ConnectMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ServerActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPromoteDemoteMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/LeaveChannelMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingKickMessage.java" />
@@ -282,25 +203,30 @@
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/JoinApprovalMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingKickMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBanMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingAddOperatorMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingAddVoicedMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingRemoveOperatorMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingRemoveVoicedMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBroadcastMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ServerUserActor.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ChannelCreator.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/userAddedMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/UserLeftMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/setUserList.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserList.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ChannelActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/ChatScene.java" />
         <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/TextMessage.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/ChannelScene.java" />
+        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/getContentMessage.java" />
+        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/GetContentMessage.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ServerUserActor.java" />
+        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/SetContentMessage.java" />
+        <option value="$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ChannelCreator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ServerActor.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ChannelActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/ClientUserActor.java" />
+        <option value="$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1.jar!/akka/actor/ActorCell.class" />
+        <option value="$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/ChatWindow.java" />
       </list>
     </option>
@@ -342,8 +268,6 @@
     </navigator>
     <panes>
       <pane id="Scratches" />
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -373,26 +297,8 @@
               <option name="myItemId" value="main" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-          </PATH>
-          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="akka-sample-main-java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="akka_irc" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
+              <option name="myItemId" value="resources" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -415,15 +321,13 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Messages" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -438,6 +342,9 @@
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/mosse/IdeaProjects/akka_irc/src/main/java/ChannelActor.java" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java" />
+    </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="" />
     </key>
@@ -445,9 +352,6 @@
       <recent name="Shared.Messages" />
       <recent name="Shared" />
       <recent name="" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/main/java" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -824,40 +728,40 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32916668" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33150384" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827586" sideWeight="0.50858366" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21734358" sideWeight="0.4914163" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21734358" sideWeight="0.4914163" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296875" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32918397" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21927084" sideWeight="0.4909091" order="6" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21927084" sideWeight="0.4909091" order="6" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3227223" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2532189" sideWeight="0.5090909" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35565314" sideWeight="0.49713877" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2996707" sideWeight="0.49713877" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250346" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="combo" />
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32916668" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33150384" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3236111" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -884,7 +788,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21734358" sideWeight="0.4914163" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21734358" sideWeight="0.4914163" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32918397" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21927084" sideWeight="0.4909091" order="6" side_tool="false" content_ui="combo" />
@@ -905,19 +809,58 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java</url>
-          <line>61</line>
+          <url>file://$PROJECT_DIR$/src/main/java/ChatWindow.java</url>
+          <line>191</line>
           <properties />
-          <option name="timeStamp" value="191" />
+          <option name="timeStamp" value="202" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/ChannelActor.java</url>
-          <line>39</line>
+          <line>37</line>
           <properties />
-          <option name="timeStamp" value="192" />
+          <option name="timeStamp" value="205" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChannelActor.java</url>
+          <line>45</line>
+          <properties />
+          <option name="timeStamp" value="206" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChannelActor.java</url>
+          <line>46</line>
+          <properties />
+          <option name="timeStamp" value="207" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChannelActor.java</url>
+          <line>71</line>
+          <properties />
+          <option name="timeStamp" value="208" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChannelActor.java</url>
+          <line>77</line>
+          <properties />
+          <option name="timeStamp" value="209" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChatWindow.java</url>
+          <line>211</line>
+          <properties />
+          <option name="timeStamp" value="212" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ChatWindow.java</url>
+          <line>223</line>
+          <properties />
+          <option name="timeStamp" value="216" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="197" />
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <option name="time" value="217" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -926,56 +869,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1-sources.jar!/akka/japi/pf/FI.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1444">
-          <caret line="92" column="16" lean-forward="false" selection-start-line="92" selection-start-column="16" selection-end-line="92" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/util/concurrent/ThreadPoolExecutor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="616" column="0" lean-forward="false" selection-start-line="616" selection-start-column="0" selection-end-line="616" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/ConnectMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="16" column="32" lean-forward="false" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/LeaveChannelMessage.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/GUIMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingPromoteDemoteMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="14" column="5" lean-forward="true" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingRemoveOperatorMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="12" column="1" lean-forward="true" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingRemoveVoicedMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="11" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/OutgoingBanMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="99">
@@ -1061,13 +954,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingKickMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="363">
@@ -1132,13 +1018,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBroadcastMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="10" column="1" lean-forward="true" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/UserMode.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="66">
@@ -1160,25 +1039,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ServerActor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/JoinApprovalMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="67">
           <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/UserJoinedMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1189,83 +1053,60 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelCreator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="4" column="48" lean-forward="false" selection-start-line="4" selection-start-column="48" selection-end-line="4" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelActor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1023">
-          <caret line="39" column="20" lean-forward="false" selection-start-line="39" selection-start-column="20" selection-end-line="39" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/HelperFunctions.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="14" column="34" lean-forward="false" selection-start-line="14" selection-start-column="34" selection-end-line="14" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/TextMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="6" column="11" lean-forward="false" selection-start-line="6" selection-start-column="11" selection-end-line="6" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16137">
-          <caret line="495" column="64" lean-forward="false" selection-start-line="495" selection-start-column="64" selection-end-line="495" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserActor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="429">
-          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ClientUserActor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1617">
-          <caret line="52" column="11" lean-forward="false" selection-start-line="52" selection-start-column="11" selection-end-line="52" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelScene.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="14" column="15" lean-forward="false" selection-start-line="14" selection-start-column="15" selection-end-line="14" selection-end-column="15" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/javafx-src.zip!/javafx/scene/control/ChoiceBox.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9306">
           <caret line="336" column="19" lean-forward="false" selection-start-line="336" selection-start-column="19" selection-end-line="336" selection-end-column="19" />
-          <folding />
+          <folding>
+            <element signature="e#0#24179#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#4516#4517#0" expanded="false" />
+            <element signature="e#4576#4577#0" expanded="false" />
+            <element signature="e#7893#7894#0" expanded="false" />
+            <element signature="e#7938#7939#0" expanded="false" />
+            <element signature="e#7991#7992#0" expanded="false" />
+            <element signature="e#8031#8032#0" expanded="false" />
+            <element signature="e#10121#10122#0" expanded="false" />
+            <element signature="e#10166#10167#0" expanded="false" />
+            <element signature="e#10219#10220#0" expanded="false" />
+            <element signature="e#10257#10258#0" expanded="false" />
+            <element signature="e#14176#14177#0" expanded="false" />
+            <element signature="e#14242#14243#0" expanded="false" />
+            <element signature="e#14295#14296#0" expanded="false" />
+            <element signature="e#14340#14341#0" expanded="false" />
+            <element signature="e#14393#14394#0" expanded="false" />
+            <element signature="e#14434#14435#0" expanded="false" />
+            <element signature="e#15016#15017#0" expanded="false" />
+            <element signature="e#15074#15075#0" expanded="false" />
+            <element signature="e#15119#15120#0" expanded="false" />
+            <element signature="e#15164#15165#0" expanded="false" />
+            <element signature="e#15209#15210#0" expanded="false" />
+            <element signature="e#15251#15252#0" expanded="false" />
+            <element signature="e#15810#15811#0" expanded="false" />
+            <element signature="e#15866#15867#0" expanded="false" />
+            <element signature="e#15911#15912#0" expanded="false" />
+            <element signature="e#15956#15957#0" expanded="false" />
+            <element signature="e#16001#16002#0" expanded="false" />
+            <element signature="e#16041#16042#0" expanded="false" />
+            <element signature="e#16616#16617#0" expanded="false" />
+            <element signature="e#16673#16674#0" expanded="false" />
+            <element signature="e#16718#16719#0" expanded="false" />
+            <element signature="e#16763#16764#0" expanded="false" />
+            <element signature="e#16808#16809#0" expanded="false" />
+            <element signature="e#16849#16850#0" expanded="false" />
+            <element signature="e#17424#17425#0" expanded="false" />
+            <element signature="e#17481#17482#0" expanded="false" />
+            <element signature="e#17526#17527#0" expanded="false" />
+            <element signature="e#17571#17572#0" expanded="false" />
+            <element signature="e#17616#17617#0" expanded="false" />
+            <element signature="e#17657#17658#0" expanded="false" />
+            <element signature="e#18146#18147#0" expanded="false" />
+            <element signature="e#18197#18198#0" expanded="false" />
+            <element signature="e#18274#18275#0" expanded="false" />
+            <element signature="e#18307#18308#0" expanded="false" />
+            <element signature="e#18387#18388#0" expanded="false" />
+            <element signature="e#18436#18437#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1273,17 +1114,185 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1551">
           <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#2789#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2712#2713#0" expanded="false" />
+            <element signature="e#2785#2786#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/GetContentMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="99">
+          <caret line="3" column="9" lean-forward="false" selection-start-line="3" selection-start-column="9" selection-end-line="3" selection-end-column="9" />
+          <folding>
+            <element signature="e#145#146#0" expanded="false" />
+            <element signature="e#183#184#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListInChannelMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="4" column="13" lean-forward="false" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/HelperFunctions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="14" column="34" lean-forward="false" selection-start-line="14" selection-start-column="34" selection-end-line="14" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/SetContentMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="6" column="22" lean-forward="false" selection-start-line="6" selection-start-column="16" selection-end-line="6" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelScene.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="429">
+          <caret line="19" column="1" lean-forward="false" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/aaaaaa.java" />
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/UserJoinedMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/BecomeOwnerMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding>
+            <element signature="e#161#162#0" expanded="false" />
+            <element signature="e#199#200#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelCreator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="429">
+          <caret line="20" column="63" lean-forward="false" selection-start-line="20" selection-start-column="63" selection-end-line="20" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/IncomingBroadcastMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="10" column="1" lean-forward="true" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/ConnectMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/TextMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="4" column="13" lean-forward="false" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Shared/Messages/SetUserListMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="8" column="29" lean-forward="false" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ServerActor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserActor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-375">
+          <caret line="18" column="22" lean-forward="true" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1.jar!/akka/actor/ActorCell.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="148">
+          <caret line="647" column="0" lean-forward="false" selection-start-line="647" selection-start-column="0" selection-end-line="647" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/typesafe/akka/akka-actor_2.12/2.5.1/akka-actor_2.12-2.5.1.jar!/akka/dispatch/Mailbox.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="299" column="0" lean-forward="false" selection-start-line="299" selection-start-column="0" selection-end-line="299" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ServerUserChannelActor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="63" column="35" lean-forward="false" selection-start-line="63" selection-start-column="35" selection-end-line="63" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ClientUserActor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ChannelActor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/ChatWindow.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="137" column="18" lean-forward="false" selection-start-line="137" selection-start-column="18" selection-end-line="137" selection-end-column="18" />
+        <state relative-caret-position="318">
+          <caret line="235" column="28" lean-forward="false" selection-start-line="235" selection-start-column="28" selection-end-line="235" selection-end-column="28" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#paintLoginWindow#0;class#ChatWindow#0" expanded="false" />
           </folding>
         </state>
       </provider>

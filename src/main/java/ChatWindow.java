@@ -1,59 +1,41 @@
 import Shared.Messages.*;
 import akka.actor.*;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import javafx.application.Platform;
-import javafx.geometry.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.Text;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.text.DefaultCaret;
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.time.LocalTime;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.jboss.netty.channel.ChannelException;
 
 
-public class ChatWindow extends Application {
+public class ChatWindow extends Application{
 
     ActorSystem system;
     ActorRef clientUserActor;
     String userName;
     String currentChannel;
-
     private Stage stage;
     private Scene loginScene, chatScene;
     private Button connectButton, sendButton;
     private Label nameLabel, serverLabel, portLabel;
     private TextField nameInput, serverInput, portInput, chatInput;
     private TextArea chatBox;
-    private ChoiceBox<ChannelScene> channelList;
+    private ChoiceBox<String> channelList;
     private ListView<String> userList;
 
     public static void main(String[] args) {
@@ -114,46 +96,24 @@ public class ChatWindow extends Application {
 
         // Set Scene and paint Stage
         loginGrid.getChildren().addAll(nameLabel, nameInput, serverLabel, serverInput, portLabel, portInput, connectButton);
-        loginScene = new Scene(loginGrid, 300, 200);
+        loginScene = new Scene(loginGrid,300,200);
         stage.setScene(loginScene);
         stage.show();
     }
 
     private void paintChatWindow() {
         stage.setTitle("UserName: " + this.userName);
-        GridPane chatGrid = new GridPane();
-        chatGrid.setPadding(new Insets(10, 10, 10, 10));
-        chatGrid.setVgap(8);
-        chatGrid.setHgap(10);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
 
         // Chat Box
         chatBox = new TextArea();
-        GridPane.setConstraints(chatBox, 0, 0);
-
-        // Channels ChoiceBox
-        channelList = new ChoiceBox<>();
-        channelList.setOnAction(e -> {
-            if(currentChannel != null) {
-                ChannelScene channelScene = channelList.getValue();
-                //channelList.getItems().indexOf();
-                channelList.getItems().forEach(cs -> {
-                    if (currentChannel.equals(cs.channel)) {
-                        cs.userList = this.userList.getItems();
-                        cs.chatBox = this.chatBox.getText();
-                    }
-                });
-                currentChannel = channelScene.channel;
-                this.userList.getItems().clear();
-                this.userList.getItems().addAll(channelScene.userList);
-                this.chatBox.clear();
-                this.chatBox.appendText(channelScene.chatBox);
-            }
-        });
-        GridPane.setConstraints(channelList, 1, 0);
+        borderPane.setCenter(chatBox);
 
         // Users ListView
         userList = new ListView<>();
-        GridPane.setConstraints(userList, 1, 1);
+        borderPane.setRight(userList);
 
         // Chat Input TextField
         chatInput = new TextField();
@@ -162,14 +122,25 @@ public class ChatWindow extends Application {
             sendInput(chatInput.getText());
             chatInput.clear();
         });
-        GridPane.setConstraints(chatInput, 0, 1);
 
-        sendButton = new Button();
+        sendButton = new Button("Send");
         sendButton.setOnAction(e -> sendInput(chatInput.getText()));
 
+
+        // Channels ChoiceBox
+        channelList = new ChoiceBox<>();
+        channelList.setOnAction(e -> {
+            currentChannel =  channelList.getValue();
+            clientUserActor.tell(new GetContentMessage(currentChannel), clientUserActor);
+        });
+
+        HBox bottomHBox = new HBox();
+        HBox.setHgrow(chatInput, Priority.ALWAYS);
+        bottomHBox.getChildren().addAll(chatInput,sendButton,channelList);
+        borderPane.setBottom(bottomHBox);
+
         // Set Scene and paint Stage
-        chatGrid.getChildren().addAll(chatBox, channelList, userList, chatInput);
-        chatScene = new Scene(chatGrid, 800, 600);
+        chatScene = new Scene(borderPane, 800, 600);
         stage.setScene(chatScene);
         stage.show();
     }
@@ -184,19 +155,6 @@ public class ChatWindow extends Application {
         Platform.runLater(() -> this.chatBox.appendText(message));
     }
 
-    protected void printText(String channel, String text) {
-        String message = "[" + LocalTime.now().toString() + "] " + text + "\n";
-        if(channel == null ){
-            Platform.runLater(() -> this.chatBox.appendText(message));
-        } else {
-            Platform.runLater(() -> channelList.getItems().forEach(channelScene -> {
-                if (channel.equals(channelScene.channel)) {
-                    channelScene.chatBox += text;
-                }
-            }));
-        }
-    }
-
     protected  void invalidSyntax(String text){
         printText("Invalid Syntax: " + text);
     }
@@ -205,67 +163,88 @@ public class ChatWindow extends Application {
         Platform.runLater(() -> this.stage.setTitle(title));
     }
 
-    public void setUserList(String channel, List<String> userList) {
+    public void setUserList(List<String> userList) {
         Platform.runLater(() ->{
-            if(currentChannel.equals(channel)){
                 this.userList.getItems().clear();
                 this.userList.getItems().addAll(userList);
-            } else {
-                channelList.getItems().forEach(channelScene->{
-                    if(channel.equals(channelScene.channel)){
-                        channelScene.userList = userList;
-                    }
-                });
-            }
         });
     }
 
-    public void addUser(String channel, String userName){
+    public void setChatBox(String text) {
         Platform.runLater(() ->{
-            if(currentChannel.equals(channel)){
-                this.userList.getItems().add(userName);
-            } else {
-                channelList.getItems().forEach(channelScene->{
-                    if(channel.equals(channelScene.channel)){
-                        channelScene.userList.add(userName);
-                    }
-                });
-            }
+            this.chatBox.clear();
+            this.chatBox.appendText(text);
         });
     }
 
-    public void removeUser(String channel, String userName){
-        Platform.runLater(() ->{
-            if(currentChannel.equals(channel)){
-                Platform.runLater(() -> this.userList.getItems().remove(userName));
-            } else {
-                channelList.getItems().forEach(channelScene->{
-                    if(channel.equals(channelScene.channel)){
-                        channelScene.userList.remove(userName);
-                    }
-                });
-            }
-        });
+
+    public void addUser(String userName){
+        Platform.runLater(() -> this.userList.getItems().add(userName));
+    }
+
+    public void removeUser(String userName){
+        Platform.runLater(() -> this.userList.getItems().remove(userName));
     }
 
     public void addChannel(String channel, List<String> userList){
         currentChannel = channel;
-        Platform.runLater(() ->{
-            this.channelList.getItems().add(new ChannelScene(channel,"", userList));
+        Platform.runLater(() -> {
+            this.channelList.getItems().add(channel);
+            this.userList.getItems().clear();
+            this.userList.getItems().addAll(userList);
+           // this.chatBox.clear();
         });
     }
 
+    public void removeChannel(String channel){
+        Platform.runLater(() -> {
+            this.channelList.getItems().remove(channel);
+            if(currentChannel != null && currentChannel.equals(channel))
+                setTitle("User: " + userName);
+                this.userList.getItems().clear();
+                this.chatBox.clear();
+        });
+        currentChannel = null;
+    }
+
     private void login(String name, String server, String port) {// TODO: add server add Error support
+        if(name.startsWith("+") || name.startsWith("@") || name.startsWith("$")){
+            Label label = new Label("User name can not start with +, @ or $\ntry another name");
+            Button button = new Button("OK");
+            button.setOnAction(e-> paintLoginWindow());
+            VBox vb = new VBox();
+            vb.getChildren().addAll(label,button);
+            vb.setAlignment(Pos.CENTER);
+            Scene badUsername = new Scene(vb, 800, 150);
+            stage.setScene(badUsername);
+            return;
+        }
         this.userName = name;
-        Config configWithPort = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).withFallback(ConfigFactory.load());
-        ConfigFactory.invalidateCaches();
-        ///Config actualConfig = configWithPort.withFallback(ConfigFactory.load());
+        try {
+            Config configWithPort = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).withFallback(ConfigFactory.load());
+            ConfigFactory.invalidateCaches();
+            ///Config actualConfig = configWithPort.withFallback(ConfigFactory.load());
 
-        //system = ActorSystem.create("IRCClient");
+            //system = ActorSystem.create("IRCClient");
 
-        system = ActorSystem.create("IRCClient", configWithPort);
-        clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName, this), "ClientUserActor");
-        //system.actorOf(Props.create(Main.Terminator.class, a), "terminator");
-        paintChatWindow();
+            system = ActorSystem.create("IRCClient", configWithPort);
+            //system.actorOf(Props.create(Main.Terminator.class, a), "terminator");
+            clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName, this), "ClientUserActor");
+            paintChatWindow();
+        }catch (ChannelException ex){
+            Label label = new Label("Could not coonect with the given Server and IP\n " +
+                    "make sure that you are using a vlid server name/IP and try a new port");
+            Button button = new Button("OK");
+            button.setOnAction( e -> paintLoginWindow());
+            VBox vb = new VBox();
+            vb.getChildren().addAll(label,button);
+            vb.setAlignment(Pos.CENTER);
+            Scene badPort = new Scene(vb, 800, 150);
+            stage.setScene(badPort);
+        }
+    }
+
+    public void doExit(){
+        //TODO
     }
 }

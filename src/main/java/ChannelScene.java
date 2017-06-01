@@ -6,14 +6,12 @@ import java.util.List;
 
 public class ChannelScene {
     public String channel;
-    public String chatBox;
-    public List<String> userList;
+    public Scene scene;
 
 
-    ChannelScene(String channel, String chatBox, List<String> userList){
+    ChannelScene(String channel,Scene scene){
         this.channel = channel;
-        this.chatBox = chatBox;
-        this.userList = userList;
+        this.scene = scene;
     }
 
     public String toString(){

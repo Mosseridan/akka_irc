@@ -120,8 +120,17 @@ public class ServerUserActor extends AbstractActor {
             ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
             if (userChannel != null) { // user exists
                 userChannel.forward(msg, getContext());
-            } else { // cannot kick if not in channel
+            } else {
                 tellClientSystem("Did not remove operator rights from user \"" + msg.userName + "\" in channel \"" + msg.channel + "\".You are not in this channel.");
+            }
+        })
+        .match(GetContentMessage.class,msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+            if (userChannel != null) { // user exists
+                userChannel.forward(msg, getContext());
+            } else {
+                tellClientSystem("Could not get content for channel \"" + msg.channel + "\". You are not in this channel.");
             }
         })
 //        .match(OutgoingPromoteDemoteMessage.class, prmDemUsrMsg -> {
