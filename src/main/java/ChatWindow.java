@@ -147,12 +147,11 @@ public class ChatWindow extends Application{
 
     private void sendInput(String text) {
         clientUserActor.tell(new GUIMessage(text), null);
-        System.out.println("$ [" + LocalTime.now().toString() + "] Sent:" + text);
+        System.out.println("$ [" + LocalTime.now().toString() + "] Sent: " +text);
     }
 
     protected void printText(String text) {
-        String message = "[" + LocalTime.now().toString() + "] " + text + "\n";
-        Platform.runLater(() -> this.chatBox.appendText(message));
+        Platform.runLater(() -> this.chatBox.appendText(text+"\n"));
     }
 
     protected  void invalidSyntax(String text){

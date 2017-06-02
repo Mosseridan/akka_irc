@@ -1,6 +1,8 @@
 package Shared.Messages;
 
 
+import java.time.LocalTime;
+
 public class OutgoingAddVoicedMessage extends Message{
     public String userName;
     public String sender;

@@ -1,5 +1,7 @@
 package Shared.Messages;
 
+import java.time.LocalTime;
+
 public class OutgoingRemoveOperatorMessage extends Message{
     public String userName;
     public String sender;
@@ -9,5 +11,6 @@ public class OutgoingRemoveOperatorMessage extends Message{
         this.userName = userName;
         this.sender = sender;
         this.channel = channel;
+
     }
 }

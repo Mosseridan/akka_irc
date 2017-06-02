@@ -1,5 +1,7 @@
 package Shared.Messages;
 
+import java.time.LocalTime;
+
 public class OutgoingPrivateMessage extends Message {
     public String userName;
     public String sender;

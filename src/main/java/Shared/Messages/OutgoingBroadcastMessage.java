@@ -1,5 +1,7 @@
 package Shared.Messages;
 
+import java.time.LocalTime;
+
 public class OutgoingBroadcastMessage extends Message {
     public String sender;
     public String channel;

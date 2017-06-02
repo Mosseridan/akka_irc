@@ -3,6 +3,8 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 
+import java.time.LocalTime;
+
 public class ClientUserActor extends AbstractActor {
     String userName;
     ActorRef serverUserActor;
@@ -37,14 +39,14 @@ public class ClientUserActor extends AbstractActor {
                 })
                 .match(TextMessage.class, msg -> {
                     if(msg.channel == null || msg.channel.equals(currentChannelName))
-                         chatWindow.printText(msg.message);
+                         chatWindow.printText(msg.time + msg.message);
                 })
                 .match(ConnectMessage.class, msg -> {
                     serverUserActor = msg.serverUserActor;
                     if (serverUserActor != null) {
-                        chatWindow.printText("<" + userName + "> Connected successfully.");
+                        chatWindow.printText("["+LocalTime.now().toString()+"] <" + userName + "> Connected successfully.");
                     }else {
-                        chatWindow.printText("Something went wrong while connecting.");
+                        chatWindow.printText("["+LocalTime.now().toString()+"] Something went wrong while connecting.");
                     }
                 })
                 .match(JoinApprovalMessage.class, msg -> {

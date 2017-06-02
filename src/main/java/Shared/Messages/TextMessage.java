@@ -1,6 +1,7 @@
 package Shared.Messages;
 
 import java.awt.*;
+import java.time.LocalTime;
 
 public class TextMessage extends Message{
     public String channel;

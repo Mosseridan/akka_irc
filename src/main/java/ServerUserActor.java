@@ -33,7 +33,8 @@ public class ServerUserActor extends AbstractActor {
         })
         .match(JoinMessage.class, msg -> {
             // get child by channel name
-            ActorSelection sel = getContext().actorSelection(msg.channel);
+            ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + msg.channel);
+            //ActorSelection sel = getContext().actorSelection(msg.channel);
             ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
             // create the child if it doesn't exist
             if (userChannel == null)  {
@@ -42,6 +43,17 @@ public class ServerUserActor extends AbstractActor {
             // try joining the channel
             userChannel.forward(msg, getContext());
         })
+//        .match(JoinMessage.class, msg -> {
+//            // get child by channel name
+//            ActorSelection sel = getContext().actorSelection(msg.channel);
+//            ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
+//            // create the child if it doesn't exist
+//            if (userChannel == null)  {
+//                userChannel = getContext().actorOf(Props.create(ServerUserChannelActor.class, msg.userName, clientUserActor, msg.channel), msg.channel);
+//            }
+//            // try joining the channel
+//            userChannel.forward(msg, getContext());
+//        })
         .match(LeaveMessage.class, msg -> {
             ActorSelection sel = getContext().actorSelection(serverUserPath + userName + "/" + msg.channel);
             ActorRef userChannel = HelperFunctions.getActorRefBySelection(sel);
