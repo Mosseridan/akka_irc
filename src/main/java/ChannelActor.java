@@ -1,137 +1,160 @@
-import akka.actor.AbstractActor;
-
 import Shared.Messages.*;
+import akka.actor.AbstractActor;
+import akka.actor.Terminated;
 import akka.routing.ActorRefRoutee;
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Router;
-import akka.actor.Terminated;
-import akka.routing.*;
-import scala.collection.IndexedSeq;
-import scala.collection.Traversable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ChannelActor extends AbstractActor {
 
     private String channelName;
     private String title;
     Router router;
-    public List<String> userList;
-    private String conversasion;
 
     public ChannelActor(String channelName) {
         this.channelName = channelName;
         title = null;
         router = new Router(new BroadcastRoutingLogic());
-        userList = new ArrayList<String>();
-        conversasion = "";
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(JoinMessage.class, msg -> {
-                    getContext().watch(sender());
-                    UserMode mode = UserMode.USER;
-                    String userName = msg.userName;
-                    if(router.routees().isEmpty()){
-                        mode = UserMode.OWNER;
-                        userName = "$" + userName;
-                    }
-                    userList.add(userName);
-                    router.route(new UserJoinedMessage(userName, channelName), self());
-                    router.route(new UserJoinedMessage(userName, channelName), self());
-                    sender().tell(new JoinApprovalMessage(userName,mode,channelName,self(),userList), self());
-                    router = router.addRoutee(new ActorRefRoutee(sender()));
-                    record("*** joins: " + userName);
-                })
-                .match(LeaveMessage.class, msg -> {
-                    router = router.removeRoutee(sender());
-                    userList.remove(msg.userName);
-                    router.route(new UserLeftMessage(msg.userName, channelName),self());
-                    record("*** parts: " + msg.userName);
-
-                    //router.route(new UserLeftMessage(msg.userName, channelName),self());
-                    //broadcastMessage();
-                    // arbitrarily select another owner
-                    if (router.routees().isEmpty()){
-                        killChannel();
-                    }
-                    else if (msg.userMode == UserMode.OWNER) {
-                        router.routees().head().send(new BecomeOwnerMessage(channelName), self());
-                        broadcastMessage("*** " + msg.userName + "became owener");
-                        router.route(new SetUserListMessage(channelName,userList),self());
-                    }
-                    sender().tell(akka.actor.PoisonPill.getInstance(), self());
-                })
-                .match(OutgoingBroadcastMessage.class, msg -> {
-                    broadcastMessage("<" + msg.sender + "> " + msg.message);
-                })
-                .match(ChangeTitleMessage.class, msg -> {
-                    title = msg.newTitle;
-                    broadcastMessage("*** Channel title changed to " + title);
-                })
-               .match(IncomingKickMessage.class, msg -> {
-                    router = router.removeRoutee(sender());
-                    userList.remove(msg.userName);
-                    broadcastMessage("*** " + msg.userName + " kicked by " + msg.sender);
-                   router.route(new SetUserListMessage(channelName,userList),self());
-               })
-                .match(IncomingBanMessage.class, msg -> {
-                    router = router.removeRoutee(sender());
-                    userList.remove(msg.userName);
-                    broadcastMessage("*** " + msg.userName + " banned by " + msg.sender);
-                    router.route(new SetUserListMessage(channelName,userList),self());
-                })
-                .match(IncomingAddVoicedMessage.class, msg -> {
-                    userList.set(userList.indexOf(msg.oldUserName),msg.newUserName);
-                    broadcastMessage("*** " + msg.newUserName + " voiced by " + msg.sender);
-                    router.route(new SetUserListMessage(channelName,userList),self());
-
-                })
-                .match(IncomingRemoveVoicedMessage.class, msg -> {
-                    userList.set(userList.indexOf(msg.oldUserName),msg.newUserName);
-                    broadcastMessage("*** " + msg.newUserName + " was unvoiced by " + msg.sender);
-                    router.route(new SetUserListMessage(channelName,userList),self());
-                })
-                .match(IncomingAddOperatorMessage.class, msg -> {
-                    userList.set(userList.indexOf(msg.oldUserName),msg.newUserName);
-                    broadcastMessage("*** " + msg.newUserName + " apointed operator by " + msg.sender);
-                    router.route(new SetUserListMessage(channelName,userList),self());
-                })
-                .match(IncomingRemoveOperatorMessage.class, msg -> {
-                    userList.set(userList.indexOf(msg.oldUserName),msg.newUserName);
-                    broadcastMessage("*** " + msg.newUserName + " removed from channel operators by " + msg.sender);
-                    router.route(new SetUserListMessage(channelName,userList),self());
-                })
-                .match(GetContentMessage.class, msg->{
-                    sender().forward(new SetContentMessage(channelName, userList, conversasion),getContext());
-                })
-                .match(KillChannelMessage.class, msg -> {
-                    broadcastMessage("*** Owner <" + msg.killer + "> disbands channel "+ msg.channelName +" . closing");
-                    killChannel();
-                })
-//                 .match(Terminated.class, message -> {
-//                    //router = router.removeRoutee(message.actor());
-//                    IncomingPromoteDemoteMessage f = new IncomingPromoteDemoteMessage(); // JUST FOR DEBUG
-//                    f.newUserMode = UserMode.OWNER; // JUST FOR DEBUG
-//                })
-                .build();
+            /** OUTGOIN MESSAGES **/
+            // LeaveMessage
+            .match(LeaveMessage.class, this::receiveLeave)
+            // ChangeTitleMessage
+            .match(ChangeTitleMessage.class, this::receiveChangeTitle)
+            // GetAllUserNamesMessage
+            .match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames)
+            /** INCOMING MESSAGES **/
+            // JoinMessage
+            .match(JoinMessage.class, this::receiveJoin)
+            // JoinApprovalMessage
+            .match(IncomingKillChannelMessage.class, this::receiveIncomingKillChannel)
+            // AnnouncementMessage
+            .match(AnnouncementMessage.class, this::receiveAnnouncement)
+            // IncomingBroadcastMessage
+            .match(IncomingBroadcastMessage.class, this::receiveIncomingBroadcast)
+            // IncomingKickMessage
+            .match(IncomingKickMessage.class, this::receiveIncomingKick)
+            // IncomingBanMessage
+            .match(IncomingBanMessage.class, this::receiveIncomingBan)
+            // IncomingAddVoicedMessage
+            .match(IncomingAddVoicedMessage.class, this::receiveIncomingAddVoiced)
+            // IncomingAddOperatorMessage
+            .match(IncomingAddOperatorMessage.class, this::receiveIncomingAddOperator)
+            // IncomingRemoveVoicedMessage
+            .match(IncomingRemoveVoicedMessage.class, this::receiveIncomingRemoveVoiced)
+            // IncomingRemoveOperatorMessage
+            .match(IncomingRemoveOperatorMessage.class, this::receiveIncomingRemoveOperator)
+            // ApointOwnerMessage
+            .match(ApointOwnerMessage.class,this::receiveApointOwner)
+            // Terminated message
+            .match(Terminated.class, this::receiveTerminated)
+            // For any unhandled message
+            .matchAny(this::receiveUnhandled)
+            .build();
     }
 
-    private void broadcastMessage(String message) {
-        router.route(new IncomingBroadcastMessage(channelName, message), self());
-        record(message);
+
+    /** OUTGOING MESSAGES **/
+    // LeaveMessage
+    private void receiveLeave(LeaveMessage msg){
+        router = router.removeRoutee(getSender());
+        router.route(new UserLeftMessage(msg.getUserName(), channelName),getSelf());
+        // arbitrarily select another owner
+        if (router.routees().isEmpty()) {
+            getContext().stop(getSelf());
+        }
     }
 
-    private void record(String message){
-        if(conversasion.length() > 2048)
-            conversasion = conversasion.substring(1024);
-        conversasion = conversasion + message +"\n";
+    // ChangeTitleMessage
+    private void receiveChangeTitle(ChangeTitleMessage msg) {
+        title = msg.getTitle();
+        router.route(new AnnouncementMessage(msg.getChannelName(),msg.getSenderName()+" changed the channel title changed to " + title),getSender());
     }
 
-    private void killChannel() {
-        router.route(akka.actor.PoisonPill.getInstance(), self());
-        self().tell(akka.actor.PoisonPill.getInstance(), self());
+    // GetAllUserNamesMessage
+    private void  receiveGetAllUserNames(GetAllUserNamesMessage msg) {
+        router.route(new GetUserNameMessage(msg.getSenderName(),channelName),getSender());
     }
+
+
+    /** INCOMING MESSAGES **/
+    // JoinMessage
+    private  void receiveJoin(JoinMessage msg) {
+            getContext().watch(getSender());
+            getSender().tell(new JoinApprovalMessage(msg.getUserName(),channelName,getSelf()), getSelf());
+            router.route(new UserJoinedMessage(msg.getUserName(), channelName), getSelf());
+            router = router.addRoutee(new ActorRefRoutee(getSender()));
+    }
+
+    // IncomingKillChannelMessage
+    private void receiveIncomingKillChannel(IncomingKillChannelMessage msg) {
+        router.route(msg,getSelf());
+        getContext().stop(getSelf());
+    }
+
+    // AnnouncementMessage
+    private void receiveAnnouncement(AnnouncementMessage msg) {
+        router.route(msg,getSender());
+    }
+
+    // IncomingBroadcastMessage
+    private void receiveIncomingBroadcast(IncomingBroadcastMessage msg) {
+        router.route(msg,getSender());
+    }
+
+    // IncomingKickMessage
+    private void receiveIncomingKick(IncomingKickMessage msg) {
+        router = router.removeRoutee(getSender());
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" kicked by "+msg.getSenderName()),getSelf());
+    }
+
+    // IncomingBanMessage
+    private void receiveIncomingBan(IncomingBanMessage msg){
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" banned by "+msg.getSenderName()),getSelf());
+    }
+
+    // IncomingAddVoicedMessage
+    private void receiveIncomingAddVoiced(IncomingAddVoicedMessage msg){
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" voiced by "+msg.getSenderName()),getSelf());
+    }
+    // IncomingAddOperatorMessage
+    private void receiveIncomingAddOperator(IncomingAddOperatorMessage msg){
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" appointed operator by "+msg.getSenderName()),getSelf());
+    }
+
+    // IncomingRemoveVoicedMessage
+    private void receiveIncomingRemoveVoiced(IncomingRemoveVoicedMessage msg){
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" voiced rights where revoked by "+msg.getSenderName()),getSelf());
+    }
+
+    // IncomingRemoveOperatorMessage
+    private void receiveIncomingRemoveOperator(IncomingRemoveOperatorMessage msg) {
+        router.route(new AnnouncementMessage(channelName,msg.getUserName()+" operator rights where revoked by "+msg.getSenderName()),getSelf());
+    }
+
+    //ApointOwnerMessage
+    private void receiveApointOwner(ApointOwnerMessage msg){
+        router.routees().head().send(new BecomeOwnerMessage(),getSelf());
+    }
+
+    // For any unhandled message
+    private void receiveUnhandled(Object o) {
+        getSender().tell(new ErrorMessage("Send "+o.toString(),"This message is invalid in the current getContext"),getSelf());
+    }
+
+    // Terminated Message
+    private void receiveTerminated (Terminated msg){
+        System.out.println("$$$ in channelActor "+channelName+" received Terminated: "+msg.toString());
+        router = router.removeRoutee(msg.actor());
+    }
+
+//    private void record(String message){
+//        if(conversasion.length() > 2048)
+//            conversasion = conversasion.substring(1024);
+//        conversasion = conversasion + message +"\n";
+//    }
 }

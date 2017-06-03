@@ -1,11 +1,19 @@
 package Shared.Messages;
 
 public class IncomingBroadcastMessage extends Message {
-    public String channel;
-    public String message;
+    private String senderName;
+    private String channelName;
+    private String message;
 
-    public IncomingBroadcastMessage(String cahnnel, String message){
-        this.channel = channel;
+    public IncomingBroadcastMessage(String senderName, String cahnnelName, String message){
+        this.senderName = senderName;
+        this.channelName = channelName;
         this.message = message;
     }
+
+    public String getSenderName(){ return senderName; }
+
+    public String getChannelName(){ return channelName; }
+
+    public String getMessage(){ return message; }
 }

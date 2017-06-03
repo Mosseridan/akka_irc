@@ -2,11 +2,19 @@
 package Shared.Messages;
 
 public class UserLeftMessage extends Message{
-    public String userName;
-    public String channel;
+    private String userName;
+    private String channelName;
 
-    public UserLeftMessage(String userName, String channel){
+    public UserLeftMessage(String userName, String channelName){
         this.userName = userName;
-        this.channel = channel;
+        this.channelName = channelName;
+    }
+
+    public String getUserName(){
+        return userName;
+    }
+
+    public String getChannelName(){
+        return channelName;
     }
 }

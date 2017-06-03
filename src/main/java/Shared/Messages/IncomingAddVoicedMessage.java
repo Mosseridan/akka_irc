@@ -1,15 +1,19 @@
 package Shared.Messages;
 
 public class IncomingAddVoicedMessage extends Message{
-    public String oldUserName;
-    public String newUserName;
-    public String sender;
-    public String channel;
+    private String userName;
+    private String senderName;
+    private String channelName;
 
-    public IncomingAddVoicedMessage(String userName, String sender, String channel){
-        this.oldUserName = userName;
-        this.newUserName = "+" + userName;
-        this.sender = sender;
-        this.channel = channel;
+    public IncomingAddVoicedMessage(String userName,String senderName, String channelName){
+        this.userName = userName;
+        this.senderName = senderName;
+        this.channelName = channelName;
     }
+
+    public String getUserName(){ return userName; }
+
+    public String getSenderName(){ return senderName; }
+
+    public String getChannelName(){ return  channelName; }
 }

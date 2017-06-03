@@ -1,19 +1,15 @@
 package Shared.Messages;
 
 public class LeaveMessage extends Message {
-    public String channel;
-    public String userName;
-    public UserMode userMode;
+    private String userName;
+    private String channelName;
 
-    public LeaveMessage(String userName, String channel){
+    public LeaveMessage(String userName, String channelName){
         this.userName = userName;
-        this.userMode = null;
-        this.channel = channel;
+        this.channelName = channelName;
     }
 
-    public LeaveMessage(String userName, UserMode userMode, String channel){
-        this.userName = userName;
-        this.userMode = userMode;
-        this.channel = channel;
-    }
+    public String getUserName(){ return userName; }
+
+    public String getChannelName(){ return channelName; }
 }

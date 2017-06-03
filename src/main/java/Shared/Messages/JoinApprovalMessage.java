@@ -2,20 +2,26 @@ package Shared.Messages;
 
 import akka.actor.ActorRef;
 
-import java.util.List;
-
 public class JoinApprovalMessage extends Message{
-    public String userName;
-    public UserMode mode;
-    public String channelName;
-    public ActorRef channelRef;
-    public List<String> channelUsers;
+    private String userName;
+    private String channelName;
+    private ActorRef channelActor;
 
-    public JoinApprovalMessage(String userName, UserMode mode,String channelName, ActorRef channelRef, List<String> channelUsers){
+    public JoinApprovalMessage(String userName, String channelName, ActorRef channelActor){
         this.userName = userName;
-        this.mode = mode;
         this.channelName = channelName;
-        this.channelRef = channelRef;
-        this.channelUsers = channelUsers;
+        this.channelActor = channelActor;
+    }
+
+    public String getUserName(){
+        return userName;
+    }
+
+    public String getChannelName(){
+        return channelName;
+    }
+
+    public ActorRef getChannelActor(){
+        return channelActor;
     }
 }

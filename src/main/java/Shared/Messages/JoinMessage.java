@@ -1,11 +1,17 @@
 package Shared.Messages;
 
 public class JoinMessage extends Message {
-    public String userName;
-    public String channel;
+    private String userName;
+    private String channelName;
 
-    public JoinMessage(String userName, String channel){
+    public JoinMessage(String userName, String channelName){
         this.userName = userName;
-        this.channel = channel;
+        this.channelName = channelName;
+    }
+
+    public String getUserName(){ return userName; }
+
+    public String getChannelName(){
+        return channelName;
     }
 }

@@ -28,7 +28,7 @@ public class ChatWindow extends Application{
     ActorSystem system;
     ActorRef clientUserActor;
     String userName;
-    String currentChannel;
+    String currentChannelName;
     private Stage stage;
     private Scene loginScene, chatScene;
     private Button connectButton, sendButton;
@@ -130,8 +130,8 @@ public class ChatWindow extends Application{
         // Channels ChoiceBox
         channelList = new ChoiceBox<>();
         channelList.setOnAction(e -> {
-            currentChannel =  channelList.getValue();
-            clientUserActor.tell(new GetContentMessage(currentChannel), clientUserActor);
+            //currentChannelName =  channelList.getValue();
+            clientUserActor.tell(new GUIMessage("/to "+channelList.getValue()) , clientUserActor);
         });
 
         HBox bottomHBox = new HBox();
@@ -145,6 +145,17 @@ public class ChatWindow extends Application{
         stage.show();
     }
 
+    private void paintErrorWindow(String message) {
+        Label label = new Label(message);
+        Button button = new Button("OK");
+        button.setOnAction(e -> paintLoginWindow());
+        VBox vb = new VBox();
+        vb.getChildren().addAll(label, button);
+        vb.setAlignment(Pos.CENTER);
+        Scene badPort = new Scene(vb, 800, 150);
+        stage.setScene(badPort);
+    }
+
     private void sendInput(String text) {
         clientUserActor.tell(new GUIMessage(text), null);
         System.out.println("$ [" + LocalTime.now().toString() + "] Sent: " +text);
@@ -155,27 +166,19 @@ public class ChatWindow extends Application{
     }
 
     protected  void invalidSyntax(String text){
-        printText("Invalid Syntax: " + text);
+        printText("["+LocalTime.now().toString()+"] *** Invalid Syntax: " + text);
     }
 
     public void setTitle(String title) {
         Platform.runLater(() -> this.stage.setTitle(title));
     }
 
-    public void setUserList(List<String> userList) {
-        Platform.runLater(() ->{
-                this.userList.getItems().clear();
-                this.userList.getItems().addAll(userList);
-        });
-    }
-
     public void setChatBox(String text) {
         Platform.runLater(() ->{
-            this.chatBox.clear();
-            this.chatBox.appendText(text);
+            chatBox.clear();
+            chatBox.appendText(text);
         });
     }
-
 
     public void addUser(String userName){
         Platform.runLater(() -> this.userList.getItems().add(userName));
@@ -185,61 +188,47 @@ public class ChatWindow extends Application{
         Platform.runLater(() -> this.userList.getItems().remove(userName));
     }
 
-    public void addChannel(String channel, List<String> userList){
-        currentChannel = channel;
+    public void addChannel(String channelName){
+        clearContext();
+        Platform.runLater(() ->
+            channelList.getItems().add(channelName));
+        currentChannelName = channelName;
+        setTitle("User: "+userName+", Channel: "+channelName);
+    }
+
+    public void removeChannel(String channelName){
+        if(currentChannelName == channelName)
+            clearContext();
+        Platform.runLater(() ->
+            this.channelList.getItems().remove(channelName));
+    }
+
+    public void clearContext(){
         Platform.runLater(() -> {
-            this.channelList.getItems().add(channel);
-            this.userList.getItems().clear();
-            this.userList.getItems().addAll(userList);
-           // this.chatBox.clear();
+            currentChannelName = null;
+            setTitle("User: " + userName);
+            userList.getItems().clear();
+            chatBox.clear();
         });
     }
 
-    public void removeChannel(String channel){
-        Platform.runLater(() -> {
-            this.channelList.getItems().remove(channel);
-            if(currentChannel != null && currentChannel.equals(channel))
-                setTitle("User: " + userName);
-                this.userList.getItems().clear();
-                this.chatBox.clear();
-        });
-        currentChannel = null;
-    }
-
-    private void login(String name, String server, String port) {// TODO: add server add Error support
-        if(name.startsWith("+") || name.startsWith("@") || name.startsWith("$")){
-            Label label = new Label("User name can not start with +, @ or $\ntry another name");
-            Button button = new Button("OK");
-            button.setOnAction(e-> paintLoginWindow());
-            VBox vb = new VBox();
-            vb.getChildren().addAll(label,button);
-            vb.setAlignment(Pos.CENTER);
-            Scene badUsername = new Scene(vb, 800, 150);
-            stage.setScene(badUsername);
-            return;
+    private void login(String userName, String serverName, String port) {// TODO: add server add Error support
+        if(userName.startsWith("+") || userName.startsWith("@") || userName.startsWith("$")){
+           paintErrorWindow("User name can not start with +, @ or $\ntry another name");
+           return;
         }
-        this.userName = name;
         try {
+            this.userName = userName;
             Config configWithPort = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).withFallback(ConfigFactory.load());
             ConfigFactory.invalidateCaches();
             ///Config actualConfig = configWithPort.withFallback(ConfigFactory.load());
-
-            //system = ActorSystem.create("IRCClient");
-
             system = ActorSystem.create("IRCClient", configWithPort);
             //system.actorOf(Props.create(Main.Terminator.class, a), "terminator");
-            clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName, this), "ClientUserActor");
+            clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName,serverName, this), "ClientUserActor");
             paintChatWindow();
         }catch (ChannelException ex){
-            Label label = new Label("Could not coonect with the given Server and IP\n " +
+            paintErrorWindow("Could not coonect with the given Server and IP\n " +
                     "make sure that you are using a vlid server name/IP and try a new port");
-            Button button = new Button("OK");
-            button.setOnAction( e -> paintLoginWindow());
-            VBox vb = new VBox();
-            vb.getChildren().addAll(label,button);
-            vb.setAlignment(Pos.CENTER);
-            Scene badPort = new Scene(vb, 800, 150);
-            stage.setScene(badPort);
         }
     }
 

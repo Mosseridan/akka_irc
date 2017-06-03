@@ -1,13 +1,19 @@
 package Shared.Messages;
 
 public class IncomingBanMessage extends Message{
-    public String userName;
-    public String sender;
-    public String channel;
+    private String userName;
+    private String senderName;
+    private String channelName;
 
-    public IncomingBanMessage(String userName, String sender, String channel){
+    public IncomingBanMessage(String userName,String senderName, String channelName){
         this.userName = userName;
-        this.sender = sender;
-        this.channel = channel;
+        this.senderName = senderName;
+        this.channelName = channelName;
     }
+
+    public String getUserName(){ return userName; }
+
+    public String getSenderName(){ return senderName; }
+
+    public String getChannelName(){ return channelName; }
 }

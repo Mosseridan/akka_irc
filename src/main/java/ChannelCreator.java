@@ -4,24 +4,17 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class ChannelCreator extends AbstractActor {
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-        .match(JoinMessage.class, msg -> { //TODO: change join logic?
-
-            // create the channel
-            ActorRef channelToJoin = getContext().actorOf(Props.create(ChannelActor.class, msg.channel), msg.channel);
-                    //.withMailbox("akka.dispatch.UnboundedMailbox"));
-            sender().tell(msg,self());
-            //channelToJoin.forward(joinMessage, getContext());
+        .match(JoinMessage.class, msg -> {
+            ActorRef newChannel = getContext().actorOf(Props.create(ChannelActor.class, msg.getChannelName()), msg.getChannelName());
+            newChannel.forward(msg, getContext());
         })
-        .match(KillChannelMessage.class, msg -> {
-            ActorSelection sel = getContext().actorSelection(msg.channelName);
+        .match(OutgoingKillChannelMessage.class, msg -> {
+            ActorSelection sel = getContext().actorSelection(msg.getChannelName());
             ActorRef channelToKill = HelperFunctions.getActorRefBySelection(sel);
             channelToKill.forward(akka.actor.PoisonPill.getInstance(), getContext());
         })

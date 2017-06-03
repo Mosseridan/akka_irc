@@ -1,16 +1,20 @@
 package Shared.Messages;
 
-import java.time.LocalTime;
-
 public class OutgoingRemoveOperatorMessage extends Message{
     public String userName;
-    public String sender;
-    public String channel;
+    public String senderName;
+    public String channelName;
 
-    public OutgoingRemoveOperatorMessage(String userName,String sender, String channel){
+
+    public OutgoingRemoveOperatorMessage(String userName,String senderName, String channelName){
         this.userName = userName;
-        this.sender = sender;
-        this.channel = channel;
-
+        this.senderName = senderName;
+        this.channelName = channelName;
     }
+
+    public String getUserName(){ return userName; }
+
+    public String getSenderName(){ return senderName; }
+
+    public String getChannelName(){ return  channelName; }
 }
