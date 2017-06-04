@@ -14,4 +14,9 @@ public class AnnouncementMessage extends Message {
     }
 
     public String getMessage(){ return message; }
+
+    @Override
+    public String toString(){
+        return("AnnouncementMessage(channelName: "+channelName+", message: "+message+")");
+    }
 }

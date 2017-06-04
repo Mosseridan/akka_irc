@@ -45,10 +45,7 @@ public class ServerUserChannelActor extends AbstractActor {
         userBuilder.match(LeaveMessage.class, this::receiveLeave);
         voicedBuilder.match(LeaveMessage.class, this::receiveLeave);
         operatorBuilder.match(LeaveMessage.class, this::receiveLeave);
-        ownerBuilder.match(LeaveMessage.class, msg -> {
-            channelActor.tell(new ApointOwnerMessage(), self());
-            receiveLeave(msg);
-        });
+        ownerBuilder.match(LeaveMessage.class, this::receiveLeaveOwner);
 
         // OutgoingKillChannelMessage
         ownerBuilder.match(OutgoingKillChannelMessage.class, this::receiveOutgoingKillChannel);
@@ -171,7 +168,14 @@ public class ServerUserChannelActor extends AbstractActor {
         voicedBuilder.match(AnnouncementMessage.class, this::receiveAnnouncement);
         operatorBuilder.match(AnnouncementMessage.class, this::receiveAnnouncement);
         ownerBuilder.match(AnnouncementMessage.class, this::receiveAnnouncement);
-        bannedBuilder.match(AnnouncementMessage.class, this::receiveAnnouncement);
+        //bannedBuilder.match(AnnouncementMessage.class, this::receiveAnnouncement);
+
+        // ChangeUserNameMessage
+        userBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
+        voicedBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
+        operatorBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
+        ownerBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
+
 
         // For any unhandled message
         userBuilder.matchAny(this::receiveUnhandled);
@@ -216,7 +220,13 @@ public class ServerUserChannelActor extends AbstractActor {
 
     // LeaveMessage
     private void receiveLeave(LeaveMessage msg){
-        channelActor.forward(new LeaveMessage(userName,channelName),getContext());
+        channelActor.tell(new LeaveMessage(userName,channelName),getSelf());
+        getContext().stop(getSelf());
+    }
+
+    private void receiveLeaveOwner(LeaveMessage msg){
+        channelActor.tell(new LeaveMessage(userName,channelName),getSelf());
+        channelActor.tell(new ApointOwnerMessage(), self());
         getContext().stop(getSelf());
     }
 
@@ -318,13 +328,16 @@ public class ServerUserChannelActor extends AbstractActor {
 
     // IncomingAddVoicedMessage
     private void receiveIncomingAddVoiced(IncomingAddVoicedMessage msg){
+        channelActor.tell(new ChangeUserNameMessage(userName,"+"+msg.getUserName(),channelName),getSelf());
         userName = "+" + msg.getUserName();
         channelActor.forward(new IncomingAddVoicedMessage(userName,msg.getSenderName(),channelName),getContext());
+
         getContext().become(voiced);
     }
 
     // IncomingAddOperatorMessage
     private void receiveIncomingAddOperator(IncomingAddOperatorMessage msg){
+        channelActor.tell(new ChangeUserNameMessage(userName,"@"+msg.getUserName(),channelName),getSelf());
         userName = "@" + msg.getUserName();
         channelActor.forward(new IncomingAddOperatorMessage(userName,msg.getSenderName(),channelName),getContext());
         getContext().become(operator);
@@ -332,6 +345,7 @@ public class ServerUserChannelActor extends AbstractActor {
 
     // IncomingRemoveVoicedMessage
     private void receiveIncomingRemoveVoiced(IncomingRemoveVoicedMessage msg){
+        channelActor.tell(new ChangeUserNameMessage(userName,msg.getUserName(),channelName),getSelf());
         userName = msg.getUserName();
         channelActor.forward(new IncomingRemoveVoicedMessage(userName,msg.getSenderName(),channelName),getContext());
         getContext().unbecome();
@@ -339,6 +353,7 @@ public class ServerUserChannelActor extends AbstractActor {
 
     // IncomingRemoveOperatorMessage
     private void receiveIncomingRemoveOperator(IncomingRemoveOperatorMessage msg) {
+        channelActor.tell(new ChangeUserNameMessage(userName,msg.getUserName(),channelName),getSelf());
         userName = msg.getUserName();
         channelActor.forward(new IncomingRemoveOperatorMessage(userName, msg.getSenderName(), channelName), getContext());
         getContext().unbecome();
@@ -347,8 +362,10 @@ public class ServerUserChannelActor extends AbstractActor {
     // BecomeOwnerMessage
     private void receiveBecomeOwner(BecomeOwnerMessage msg){
         if(userName.startsWith("+") || userName.startsWith("@")){
+            channelActor.tell(new ChangeUserNameMessage(userName,"$" + userName.substring(1),channelName),getSelf());
             userName = "$" + userName.substring(1);
         } else {
+            channelActor.tell(new ChangeUserNameMessage(userName,"$" + userName,channelName),getSelf());
             userName = "$" + userName;
         }
         channelActor.tell(new AnnouncementMessage(channelName,userName+" was apointed the new owner of channel "+channelName),getSelf());
@@ -374,6 +391,11 @@ public class ServerUserChannelActor extends AbstractActor {
     private void receiveAnnouncement(AnnouncementMessage msg) {
         clientUserActor.forward(msg,getContext());
     }
+
+    // ChangeUserNameMessage
+     private void receiveChangeUserName(ChangeUserNameMessage msg){
+        clientUserActor.forward(msg,getContext());
+     }
 
     // For any unhandled message
     private void receiveUnhandled(Object o) {

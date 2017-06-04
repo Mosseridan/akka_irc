@@ -12,4 +12,9 @@ public class LeaveMessage extends Message {
     public String getUserName(){ return userName; }
 
     public String getChannelName(){ return channelName; }
+
+    @Override
+    public String toString(){
+        return("LeaveMessage(userName: "+userName+", channelName: "+channelName+")");
+    }
 }

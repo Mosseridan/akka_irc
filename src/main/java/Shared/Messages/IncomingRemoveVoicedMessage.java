@@ -16,4 +16,10 @@ public class IncomingRemoveVoicedMessage {
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("IncomingRemoveVoicedMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
+
 }

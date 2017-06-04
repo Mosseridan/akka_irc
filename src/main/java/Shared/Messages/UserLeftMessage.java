@@ -17,4 +17,9 @@ public class UserLeftMessage extends Message{
     public String getChannelName(){
         return channelName;
     }
+
+    @Override
+    public String toString(){
+        return("UserLeftMessage(userName: "+userName+", channelName: "+channelName+")");
+    }
 }

@@ -16,4 +16,9 @@ public class GetAllUserNamesMessage extends Message {
     public String getChannelName(){
         return channelName;
     }
+
+    @Override
+    public String toString(){
+        return("GetAllUserNamesMessage(senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }

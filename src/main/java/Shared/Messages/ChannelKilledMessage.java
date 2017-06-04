@@ -9,4 +9,9 @@ public class ChannelKilledMessage extends Message {
         this.channelName = channelName;
         this.killer = killer;
     }
+
+    @Override
+    public String toString(){
+        return("ChannelKilledMessage(channelName: "+channelName+", killer: "+killer+")");
+    }
 }

@@ -114,9 +114,13 @@ public class ServerUserActor extends AbstractActor {
 
     // LeaveMessage
     private void receiveLeave(LeaveMessage msg){
-        Optional<ActorRef> ServerUserChannelActor = getServerUserChannelActorRef(msg.getChannelName());
-        if(ServerUserChannelActor.isPresent()) {
-            ServerUserChannelActor.get().forward(msg, getContext());
+        Optional<ActorRef> serverUserChannelActor = getServerUserChannelActorRef(msg.getChannelName());
+        if(serverUserChannelActor.isPresent()) {
+//            ActorRef actor = getActorRef(serverUserPath+msg.getUserName()+"/"+msg.getChannelName());
+//            ActorRef actor2 = serverUserChannelActor.get();
+//            actor.forward(msg, getContext());
+//            actor2.tell(new LeaveMessage(userName,msg.getChannelName()),getSelf());
+            serverUserChannelActor.get().forward(msg, getContext());
         } else {
             getSender().tell(new ErrorMessage(
                     "leave channel \""+msg.getChannelName()+"\"",

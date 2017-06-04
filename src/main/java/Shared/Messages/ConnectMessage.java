@@ -12,4 +12,9 @@ public class ConnectMessage extends Message {
     public String getUserName(){
         return userName;
     }
+
+    @Override
+    public String toString(){
+        return("ConnectMessage(userName: "+userName+")");
+    }
 }

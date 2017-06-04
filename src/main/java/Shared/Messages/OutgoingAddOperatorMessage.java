@@ -17,4 +17,9 @@ public class OutgoingAddOperatorMessage extends Message{
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("OutgoingAddOperatorMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }

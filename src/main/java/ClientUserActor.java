@@ -56,6 +56,8 @@ public class ClientUserActor extends AbstractActor {
             .match(IncomingBanMessage.class, this::receiveIncomingBan)
             // AddUserNameMessage
             .match(AddUserNameMessage.class, this::receiveAddUserName)
+            // ChangeUserNameMessage
+            .match(ChangeUserNameMessage.class, this::receiveChangeUserName)
             // ExitMessage
             .match(ExitMessage.class, this::receiveExit)
             // For any unhandled message
@@ -72,14 +74,14 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingBroadcastMessage
     private void receiveIncomingBroadcast(IncomingBroadcastMessage msg) {
-        if(msg.getChannelName() == currentChannelName) {
+        if(msg.getChannelName().equals(currentChannelName)) {
             chatWindow.printText(msg.getTime()+"<"+msg.getSenderName()+"> "+msg.getMessage());
         }
     }
 
     // AnnouncementMessage
     private void receiveAnnouncement(AnnouncementMessage msg) {
-        if(msg.getChannelName() == currentChannelName) {
+        if(msg.getChannelName().equals(currentChannelName)) {
             chatWindow.printText(msg.getTime()+msg.getMessage());
         }
     }
@@ -100,17 +102,17 @@ public class ClientUserActor extends AbstractActor {
     }
 
     // JoinApprovalMessage
-    private void receiveJoinApproval(JoinApprovalMessage msg) {
+    private void receiveJoinApproval(JoinApprovalMessage msg) { //TODO add title
         currentChannelName = msg.getChannelName();
         chatWindow.addChannel(msg.getChannelName());
         serverUserActor.tell(new GetAllUserNamesMessage(userName,currentChannelName),getSelf());
-        chatWindow.printText("*** joins: "+msg.getUserName());
-        chatWindow.setTitle("User: "+userName+", Channel: "+msg.getChannelName());
+        chatWindow.printText(msg.getTime()+"*** joins: "+msg.getUserName());
+        chatWindow.setTitle("UserName: "+userName+", ChannelName: "+msg.getChannelName());
     }
 
     // UserJoinedMessage
     private void receiveUserJoined(UserJoinedMessage msg) {
-        if(msg.getChannelName() == currentChannelName) {
+        if(msg.getChannelName().equals(currentChannelName)) {
             chatWindow.printText(msg.getTime() + "*** joins: " + msg.getUserName());
             chatWindow.addUser(msg.getUserName());
         }
@@ -118,7 +120,7 @@ public class ClientUserActor extends AbstractActor {
 
     // UserLeftMessage
     private void receiveUserLeft(UserLeftMessage msg) {
-        if(msg.getChannelName() == currentChannelName) {
+        if(msg.getChannelName().equals(currentChannelName)) {
             chatWindow.printText(msg.getTime() + "*** parts: " + msg.getUserName());
             chatWindow.removeUser(msg.getUserName());
         }
@@ -126,7 +128,7 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingKillChannelMessage
     private void receiveIncomingKillChannel(IncomingKillChannelMessage msg){
-        if(msg.getChannelName() == currentChannelName) {
+        if(msg.getChannelName().equals(currentChannelName)) {
             chatWindow.printText(msg.getTime() + "*** channel "+msg.getChannelName()+" was disband by "+msg.getSenderName());
             currentChannelName = null;
         }
@@ -135,8 +137,8 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingKickMessage
     private void receiveIncomingKick(IncomingKickMessage msg){
-        if(msg.getChannelName() == currentChannelName){
-            chatWindow.printText("*** " + msg.getUserName() + " kicked by " + msg.getSenderName());
+        if(msg.getChannelName().equals(currentChannelName)){
+            chatWindow.printText(msg.getTime()+"*** " + msg.getUserName() + " kicked by " + msg.getSenderName());
             currentChannelName = null;
         }
         chatWindow.removeChannel(msg.getChannelName());
@@ -144,7 +146,7 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingBanMessage
     private void receiveIncomingBan(IncomingBanMessage msg){
-        if(msg.getChannelName() == currentChannelName){
+        if(msg.getChannelName().equals(currentChannelName)){
             chatWindow.printText("*** " + msg.getUserName() + " banned by " + msg.getSenderName());
             currentChannelName = null;
         }
@@ -153,8 +155,16 @@ public class ClientUserActor extends AbstractActor {
 
     // AddUserNameMessage
     private void receiveAddUserName(AddUserNameMessage msg) {
-        if(msg.getChannelName() == currentChannelName){
+        if(msg.getChannelName().equals(currentChannelName)){
            chatWindow.addUser(msg.getUserName());
+        }
+    }
+
+    // ChangeUserNameMessage
+    private void receiveChangeUserName(ChangeUserNameMessage msg){
+        if(msg.getChannelName().equals(currentChannelName)){
+            chatWindow.removeUser(msg.getOldUserName());
+            chatWindow.addUser(msg.getNewUserName());
         }
     }
 
@@ -167,9 +177,12 @@ public class ClientUserActor extends AbstractActor {
     // GUIMessage
     private void receiveGUI(GUIMessage msg) {
         String text = msg.getText();
-        if (text == "") return;
+        if (text.equals("")) return;
         String[] cmdArr = text.split(" ");
-        if (!verifyFormat(cmdArr)) return;
+        if (!verifyFormat(cmdArr)) {
+            chatWindow.invalidSyntax(msg.getText());
+            return;
+        }
 
         switch (cmdArr[0]) {
             case "/w":
@@ -179,8 +192,9 @@ public class ClientUserActor extends AbstractActor {
                 serverUserActor.tell(new JoinMessage(userName, cmdArr[1]), getSelf());
                 break;
             case "/leave":
-                if (currentChannelName == cmdArr[1]) {
+                if (cmdArr[1].equals(currentChannelName)) {
                     chatWindow.printText(msg.getTime()+"*** parts: " + userName);
+                    chatWindow.clearContext();
                     currentChannelName = null;
                 }
                 chatWindow.removeChannel(cmdArr[1]);
@@ -242,13 +256,13 @@ public class ClientUserActor extends AbstractActor {
     }
 
     boolean verifyFormat(String[] cmdArr) {
-        if (cmdArr.length == 2 && (cmdArr[0] == "/join" || cmdArr[0] == "/leave" || cmdArr[0] == "/disband")) {
+        if (cmdArr.length == 2 && (cmdArr[0].equals("/join") || cmdArr[0].equals("/leave") || cmdArr[0].equals("/disband"))) {
             return true;
-        } else if (cmdArr.length == 3 && (cmdArr[0] == "/kick" || cmdArr[0] == "/ban" || cmdArr[0] == "/title")) {
+        } else if (cmdArr.length == 3 && (cmdArr[0].equals("/kick") || cmdArr[0].equals("/ban") || cmdArr[0].equals("/title"))) {
             return true;
-        } else if (cmdArr.length == 4 && (cmdArr[0] == "/add" || cmdArr[0] == "/remove") && (cmdArr[2] == "v" || cmdArr[2] == "op")) {
+        } else if (cmdArr.length == 4 && (cmdArr[0].equals("/add") || cmdArr[0].equals("/remove") && (cmdArr[2].equals("v") || cmdArr[2].equals("op")))) {
             return true;
-        } else if (cmdArr.length >= 3 && (cmdArr[0] == "/w" || cmdArr[0] == "/to")) {
+        } else if (cmdArr.length >= 3 && (cmdArr[0].equals("/w") || cmdArr[0].equals("/to"))) {
             return true;
         }else if (!cmdArr[0].startsWith("/")){// just text
             return true;

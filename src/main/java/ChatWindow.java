@@ -78,7 +78,7 @@ public class ChatWindow extends Application{
         GridPane.setConstraints(serverLabel, 0, 1);
 
         // Server TextField
-        serverInput = new TextField("10.0.0.127");
+        serverInput = new TextField("127.0.0.1");
         GridPane.setConstraints(serverInput, 1, 1);
 
         // Port Label
@@ -188,12 +188,12 @@ public class ChatWindow extends Application{
         Platform.runLater(() -> this.userList.getItems().remove(userName));
     }
 
-    public void addChannel(String channelName){
+    public void addChannel(String channelName){ //TODO add title
         clearContext();
         Platform.runLater(() ->
             channelList.getItems().add(channelName));
         currentChannelName = channelName;
-        setTitle("User: "+userName+", Channel: "+channelName);
+        setTitle("UserName: "+userName+", ChannelName: "+channelName);
     }
 
     public void removeChannel(String channelName){

@@ -3,6 +3,7 @@ import akka.actor.AbstractActor;
 import akka.actor.Terminated;
 import akka.routing.ActorRefRoutee;
 import akka.routing.BroadcastRoutingLogic;
+import akka.routing.Routee;
 import akka.routing.Router;
 
 public class ChannelActor extends AbstractActor {
@@ -50,6 +51,8 @@ public class ChannelActor extends AbstractActor {
             .match(IncomingRemoveOperatorMessage.class, this::receiveIncomingRemoveOperator)
             // ApointOwnerMessage
             .match(ApointOwnerMessage.class,this::receiveApointOwner)
+            // ChangeUserNameMessage
+            .match(ChangeUserNameMessage.class,this::receiveChangeUserName)
             // Terminated message
             .match(Terminated.class, this::receiveTerminated)
             // For any unhandled message
@@ -124,11 +127,13 @@ public class ChannelActor extends AbstractActor {
     // IncomingAddOperatorMessage
     private void receiveIncomingAddOperator(IncomingAddOperatorMessage msg){
         router.route(new AnnouncementMessage(channelName,msg.getUserName()+" appointed operator by "+msg.getSenderName()),getSelf());
+
     }
 
     // IncomingRemoveVoicedMessage
     private void receiveIncomingRemoveVoiced(IncomingRemoveVoicedMessage msg){
         router.route(new AnnouncementMessage(channelName,msg.getUserName()+" voiced rights where revoked by "+msg.getSenderName()),getSelf());
+
     }
 
     // IncomingRemoveOperatorMessage
@@ -139,6 +144,11 @@ public class ChannelActor extends AbstractActor {
     //ApointOwnerMessage
     private void receiveApointOwner(ApointOwnerMessage msg){
         router.routees().head().send(new BecomeOwnerMessage(),getSelf());
+    }
+
+    //ChangeUserNameMessage
+    private void receiveChangeUserName(ChangeUserNameMessage msg){
+        router.route(msg,getSender());
     }
 
     // For any unhandled message

@@ -24,4 +24,9 @@ public class JoinApprovalMessage extends Message{
     public ActorRef getChannelActor(){
         return channelActor;
     }
+
+    @Override
+    public String toString(){
+        return("JoinApprovalMessage(userName: "+userName+", channelName: "+channelName+", channelActor: "+ channelActor.toString()+")");
+    }
 }

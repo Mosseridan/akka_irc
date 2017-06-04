@@ -5,7 +5,7 @@ public class IncomingBroadcastMessage extends Message {
     private String channelName;
     private String message;
 
-    public IncomingBroadcastMessage(String senderName, String cahnnelName, String message){
+    public IncomingBroadcastMessage(String senderName, String channelName, String message){
         this.senderName = senderName;
         this.channelName = channelName;
         this.message = message;

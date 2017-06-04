@@ -16,4 +16,9 @@ public class OutgoingBroadcastMessage extends Message {
     public String getChannelName(){ return channelName; }
 
     public String getMessage(){ return message; }
+
+    @Override
+    public String toString(){
+        return("OutgoingBroadcastMessage(senderName: "+senderName+", channelName: "+channelName+", message: "+message+")");
+    }
 }

@@ -16,4 +16,9 @@ public class IncomingRemoveOperatorMessage {
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("IncomingRemoveOperatorMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }

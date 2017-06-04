@@ -16,4 +16,9 @@ public class ChangeTitleMessage extends Message {
     public String getTitle(){ return title; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("ChangeTitleMessage(senderName: "+senderName+", title: "+title+", channelName: "+channelName+")");
+    }
 }

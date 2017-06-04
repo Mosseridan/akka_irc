@@ -13,4 +13,9 @@ public class ConnectApprovalMessage extends Message{
         return serverUserActor;
     }
 
+    @Override
+    public String toString(){
+        return("ConnectApprovalMessage(serverUserActor: "+serverUserActor.toString()+")");
+    }
+
 }

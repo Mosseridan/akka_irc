@@ -16,4 +16,9 @@ public class OutgoingAddVoicedMessage extends Message{
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("OutgoingAddVoicedMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }

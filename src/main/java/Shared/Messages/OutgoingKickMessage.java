@@ -16,4 +16,9 @@ public class OutgoingKickMessage extends Message{
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return  channelName; }
+
+    @Override
+    public String toString(){
+        return("OutgoingKickMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }

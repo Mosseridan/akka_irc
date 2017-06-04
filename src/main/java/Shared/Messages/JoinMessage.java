@@ -14,4 +14,9 @@ public class JoinMessage extends Message {
     public String getChannelName(){
         return channelName;
     }
+
+    @Override
+    public String toString(){
+        return("JoinMessage(userName: "+userName+", channelName: "+channelName+")");
+    }
 }

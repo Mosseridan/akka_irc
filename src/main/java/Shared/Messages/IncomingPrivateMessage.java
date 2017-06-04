@@ -16,5 +16,10 @@ public class IncomingPrivateMessage extends Message {
     public String getSenderName(){ return senderName; }
 
     public String getMessage(){ return message; }
+
+    @Override
+    public String toString(){
+        return("IncomingPrivateMessage(userName: "+userName+", senderName: "+senderName+", message: "+message+")");
+    }
 }
 

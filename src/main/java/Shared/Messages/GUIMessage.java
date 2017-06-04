@@ -8,4 +8,9 @@ public class GUIMessage extends Message {
     }
 
     public String getText(){ return text; }
+
+    @Override
+    public String toString(){
+        return("GUIMessage(text: "+text+")");
+    }
 }

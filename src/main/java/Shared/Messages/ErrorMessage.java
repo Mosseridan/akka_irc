@@ -13,4 +13,9 @@ public class ErrorMessage extends Message{
     public String getMessage(){
         return message;
     }
+
+    @Override
+    public String toString(){
+        return("ErrorMessage(message: "+message+")");
+    }
 }

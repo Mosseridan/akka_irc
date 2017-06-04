@@ -16,4 +16,9 @@ public class UserJoinedMessage extends Message{
     public String getChannelName(){
         return channelName;
     }
+
+    @Override
+    public String toString(){
+        return("UserJoinedMessage(userName: "+userName+", channelName: "+channelName+")");
+    }
 }

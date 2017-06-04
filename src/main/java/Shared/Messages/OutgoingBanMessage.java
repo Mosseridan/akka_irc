@@ -16,4 +16,9 @@ public class OutgoingBanMessage extends Message{
     public String getSenderName(){ return senderName; }
 
     public String getChannelName(){ return channelName; }
+
+    @Override
+    public String toString(){
+        return("OutgoingBanMessage(userName: "+userName+", senderName: "+senderName+", channelName: "+channelName+")");
+    }
 }
