@@ -2,6 +2,7 @@ import Shared.Messages.*;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.Terminated;
 import akka.japi.pf.ReceiveBuilder;
 
 public class ServerUserChannelActor extends AbstractActor {
@@ -40,50 +41,73 @@ public class ServerUserChannelActor extends AbstractActor {
         voicedBuilder.match(OutgoingBroadcastMessage.class, this::receiveOutgoingBroadcast);
         operatorBuilder.match(OutgoingBroadcastMessage.class, this::receiveOutgoingBroadcast);
         ownerBuilder.match(OutgoingBroadcastMessage.class, this::receiveOutgoingBroadcast);
+        bannedBuilder.match(OutgoingBroadcastMessage.class,this::banError);
 
         // LeaveMessage
         userBuilder.match(LeaveMessage.class, this::receiveLeave);
         voicedBuilder.match(LeaveMessage.class, this::receiveLeave);
         operatorBuilder.match(LeaveMessage.class, this::receiveLeave);
         ownerBuilder.match(LeaveMessage.class, this::receiveLeaveOwner);
+        bannedBuilder.match(LeaveMessage.class,this::banError);
+
 
         // OutgoingKillChannelMessage
         ownerBuilder.match(OutgoingKillChannelMessage.class, this::receiveOutgoingKillChannel);
+        bannedBuilder.match(OutgoingKillChannelMessage.class,this::banError);
 
         // OutgoingKickMessage
         operatorBuilder.match(OutgoingKickMessage.class, this::receiveOutgoingKick);
         ownerBuilder.match(OutgoingKickMessage.class, this::receiveOutgoingKick);
+        bannedBuilder.match(OutgoingKickMessage.class,this::banError);
+
 
         // OutgoingBanMessage
         operatorBuilder.match(OutgoingBanMessage.class, this::receiveOutgoingBan);
         ownerBuilder.match(OutgoingBanMessage.class, this::receiveOutgoingBan);
+        bannedBuilder.match(OutgoingBanMessage.class,this::banError);
+
 
         // OutgoingAddVoicedMessage
         operatorBuilder.match(OutgoingAddVoicedMessage.class, this::receiveOutgoingAddVoiced);
         ownerBuilder.match(OutgoingAddVoicedMessage.class, this::receiveOutgoingAddVoiced);
+        bannedBuilder.match(OutgoingAddVoicedMessage.class,this::banError);
+
 
         // OutgoingAddOperatorMessage
         operatorBuilder.match(OutgoingAddOperatorMessage.class, this::receiveOutgoingAddOperator);
         ownerBuilder.match(OutgoingAddOperatorMessage.class, this::receiveOutgoingAddOperator);
+        bannedBuilder.match(OutgoingAddOperatorMessage.class,this::banError);
+
 
         // OutgoingRemoveVoicedMessage
         operatorBuilder.match(OutgoingRemoveVoicedMessage.class, this::receiveOutgoingRemoveVoiced);
         ownerBuilder.match(OutgoingRemoveVoicedMessage.class, this::receiveOutgoingRemoveVoiced);
+        bannedBuilder.match(OutgoingRemoveVoicedMessage.class,this::banError);
 
         // OutgoingRemoveOperatorMessage
         operatorBuilder.match(OutgoingRemoveOperatorMessage.class, this::receiveOutgoingRemoveOperator);
         ownerBuilder.match(OutgoingRemoveOperatorMessage.class, this::receiveOutgoingRemoveOperator);
+        bannedBuilder.match(OutgoingRemoveOperatorMessage.class,this::banError);
+
 
         // ChangeTitleMessage
         voicedBuilder.match(ChangeTitleMessage.class, this::receiveChangeTitle);
         operatorBuilder.match(ChangeTitleMessage.class, this::receiveChangeTitle);
         ownerBuilder.match(ChangeTitleMessage.class, this::receiveChangeTitle);
+        bannedBuilder.match(ChangeTitleMessage.class,this::banError);
 
-        // GetAllUserNamesMessage
-        userBuilder.match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames);
-        voicedBuilder.match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames);
-        operatorBuilder.match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames);
-        ownerBuilder.match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames);
+        // TitleChangedMessage
+        voicedBuilder.match(TitleChangedMessage.class, this::receiveTitleChanged);
+        operatorBuilder.match(TitleChangedMessage.class, this::receiveTitleChanged);
+        ownerBuilder.match(TitleChangedMessage.class, this::receiveTitleChanged);
+
+        // GetContentMessage
+        userBuilder.match(GetContentMessage.class, this::receiveGetContent);
+        voicedBuilder.match(GetContentMessage.class, this::receiveGetContent);
+        operatorBuilder.match(GetContentMessage.class, this::receiveGetContent);
+        ownerBuilder.match(GetContentMessage.class, this::receiveGetContent);
+        bannedBuilder.match(GetContentMessage.class,this::banError);
+
 
         /** INCOMING MESSAGES **/
         // JoinApprovalMessage
@@ -176,15 +200,19 @@ public class ServerUserChannelActor extends AbstractActor {
         operatorBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
         ownerBuilder.match(ChangeUserNameMessage.class, this::receiveChangeUserName);
 
+        // Terminated message
+        userBuilder.match(Terminated.class, this::receiveTerminated);
+        voicedBuilder.match(Terminated.class, this::receiveTerminated);
+        operatorBuilder.match(Terminated.class, this::receiveTerminated);
+        ownerBuilder.match(Terminated.class, this::receiveTerminated);
+        bannedBuilder.match(Terminated.class, this::receiveTerminated);
+
 
         // For any unhandled message
         userBuilder.matchAny(this::receiveUnhandled);
         voicedBuilder.matchAny(this::receiveUnhandled);
         operatorBuilder.matchAny(this::receiveUnhandled);
         ownerBuilder.matchAny(this::receiveUnhandled);
-        bannedBuilder.matchAny(msg -> getSender().tell(
-                new ErrorMessage("send "+msg.toString(),
-                "You are banned from this channel"), getSelf()));
 
 
         user = userBuilder.build();
@@ -201,6 +229,7 @@ public class ServerUserChannelActor extends AbstractActor {
 
     @Override
     public void preStart() {
+        getContext().watch(serverUserActor);
         channelActor = getActorRef(channelCreatorPath + "/" + channelName);
         if(channelActor == null){ //channel dose not exist -> request to create it from channel creator. he will then forward a the join request to the new channel.
             ActorRef channelCreator = getActorRef(channelCreatorPath);
@@ -210,6 +239,7 @@ public class ServerUserChannelActor extends AbstractActor {
         } else{ // channel exist -> request to join it;
             channelActor.tell(new JoinMessage(userName,channelName),getSelf());
         }
+
     }
 
     /** OUTGOING MESSAGES **/
@@ -247,7 +277,7 @@ public class ServerUserChannelActor extends AbstractActor {
             .forward(new IncomingBanMessage(msg.getUserName(),userName,channelName),getContext());
     }
 
-    // OutgoingAddVoicedMessage
+    // OutgoinigAddVoicedMessage
     private void receiveOutgoingAddVoiced(OutgoingAddVoicedMessage msg) {
         getServerUserChannelActorRef(msg.getUserName())
             .forward(new IncomingAddVoicedMessage(msg.getUserName(),userName,channelName),getContext());
@@ -276,8 +306,13 @@ public class ServerUserChannelActor extends AbstractActor {
         channelActor.forward(new ChangeTitleMessage(userName,channelName,msg.getTitle()),getContext());
     }
 
-    // GetAllUserNamesMessage
-    private void  receiveGetAllUserNames(GetAllUserNamesMessage msg){
+    //TitleChangedMessage
+    private void receiveTitleChanged(TitleChangedMessage msg){
+        clientUserActor.forward(msg,getContext());
+    }
+
+    // GetContentMessage
+    private void  receiveGetContent(GetContentMessage msg){
         channelActor.forward(msg,getContext());
     }
 
@@ -396,6 +431,20 @@ public class ServerUserChannelActor extends AbstractActor {
      private void receiveChangeUserName(ChangeUserNameMessage msg){
         clientUserActor.forward(msg,getContext());
      }
+
+     // Ban Error
+    private void banError(Message msg){
+        getSender().tell(
+                new ErrorMessage("send "+msg.toString(),
+                        "You are banned from this channel"), getSelf());
+    }
+
+    // Terminated Message
+    private void receiveTerminated (Terminated msg){
+        System.out.println("$$$ in serverUserChannelActor userName: "+userName+" channelName: "+channelName+" received Terminated: "+msg.toString());
+        channelActor.tell(new LeaveMessage(userName,channelName),getSelf());
+        getContext().stop(getSelf());
+    }
 
     // For any unhandled message
     private void receiveUnhandled(Object o) {

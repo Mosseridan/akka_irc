@@ -1,9 +1,6 @@
 
 import Shared.Messages.*;
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
+import akka.actor.*;
 
 import java.util.Optional;
 
@@ -20,6 +17,11 @@ public class ServerUserActor extends AbstractActor {
         this.userName = username;
         this.clientUserActor = clientUserActor;
         this.channelCreator = channelCreator;
+    }
+
+    @Override
+    public void preStart() {
+        getContext().watch(clientUserActor);
     }
 
     @Override
@@ -50,16 +52,16 @@ public class ServerUserActor extends AbstractActor {
             .match(OutgoingRemoveOperatorMessage.class, this::receiveOutgoingRemoveOperator)
             // ChangeTitleMessage
             .match(ChangeTitleMessage.class, this::receiveChangeTitle)
-            // GetAllUserNamesMessage
-            .match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames)
+            // GetContentMessage
+            .match(GetContentMessage.class, this::receiveGetAllUserNames)
             /** INCOMING MESSAGES **/
             .match(IncomingPrivateMessage.class, this::receiveIncomingPrivate)
-            // ExitMessage
-            .match(ExitMessage.class, this::receiveExit)
             // ErrorMessage
             .match(ErrorMessage.class, this::receiveError)
             // AnnouncementMessage
             .match(AnnouncementMessage.class, this::receiveAnnouncement)
+            // Terminated message
+            .match(Terminated.class, this::receiveTerminated)
             // For any unhandled message
             .matchAny(this::receiveUnhandled)
             .build();
@@ -99,7 +101,7 @@ public class ServerUserActor extends AbstractActor {
         if (getServerUserChannelActorRef(msg.getChannelName()).isPresent()) {
             getSender().tell(new ErrorMessage(
                             "join channel",
-                            "You are either already in this channel or banned from it"), getSelf());
+                            "You are already in this channel"), getSelf());
         } else {
             getContext().actorOf(
                 Props.create(ServerUserChannelActor.class, // actor type
@@ -224,8 +226,8 @@ public class ServerUserActor extends AbstractActor {
         }
     }
 
-    // GetAllUserNamesMessage
-    private void  receiveGetAllUserNames(GetAllUserNamesMessage msg){
+    // GetContentMessage
+    private void  receiveGetAllUserNames(GetContentMessage msg){
         Optional<ActorRef> ServerUserChannelActor = getServerUserChannelActorRef(msg.getChannelName());
         if(ServerUserChannelActor.isPresent()) {
             ServerUserChannelActor.get().forward(msg, getContext());
@@ -241,12 +243,6 @@ public class ServerUserActor extends AbstractActor {
     private void receiveIncomingPrivate(IncomingPrivateMessage msg) {
         clientUserActor.forward(msg,getContext());
     }
-    // ExitMessage
-    private void receiveExit(ExitMessage msg){
-        getContext().getChildren().forEach(serverChannelUserActor ->
-                serverChannelUserActor.tell(msg,getSelf()));
-                getContext().stop(getSelf());
-    }
 
     // ErrorMessage
     private void receiveError(ErrorMessage msg) {
@@ -256,6 +252,12 @@ public class ServerUserActor extends AbstractActor {
     // AnnouncementMessage
     private void receiveAnnouncement(AnnouncementMessage msg) {
         clientUserActor.forward(msg,getContext());
+    }
+
+    // Terminated Message
+    private void receiveTerminated (Terminated msg){
+        System.out.println("$$$ in serverUserActor userName: "+userName+" received Terminated: "+msg.toString());
+        getContext().stop(getSelf());
     }
 
     // For any unhandled message

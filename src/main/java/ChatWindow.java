@@ -3,24 +3,19 @@ import akka.actor.*;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import java.time.LocalTime;
-import java.util.List;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
+import javafx.scene.text.*;
 import javafx.stage.Stage;
-import org.jboss.netty.channel.ChannelException;
+import javafx.stage.WindowEvent;
 
 
 public class ChatWindow extends Application{
@@ -34,21 +29,16 @@ public class ChatWindow extends Application{
     private Button connectButton, sendButton;
     private Label nameLabel, serverLabel, portLabel;
     private TextField nameInput, serverInput, portInput, chatInput;
-    private TextArea chatBox;
+    private ListView<TextFlow> chatBox;
     private ChoiceBox<String> channelList;
-    private ListView<String> userList;
+    private ListView<Text> userList;
+    private Label chatTitle;
+
+    public static final Font ITALIC_FONT = Font.font("Serif", FontPosture.ITALIC, Font.getDefault().getSize());
+
 
     public static void main(String[] args) {
         launch(args);
-//        EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                try {
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
     }
 
     @Override
@@ -102,13 +92,18 @@ public class ChatWindow extends Application{
     }
 
     private void paintChatWindow() {
-        stage.setTitle("UserName: " + this.userName);
-        stage.setOnCloseRequest(e -> doExit());
+        stage.setTitle("Akka-IRC  "+userName);
+        stage.setOnCloseRequest(this::doExit);
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
 
+        // Chat Label
+        chatTitle =  new Label("UserName: "+userName);
+        borderPane.setTop(chatTitle);
+
         // Chat Box
-        chatBox = new TextArea();
+        chatBox = new ListView<>();
+        chatBox.setEditable(false);
         borderPane.setCenter(chatBox);
 
         // Users ListView
@@ -129,10 +124,7 @@ public class ChatWindow extends Application{
 
         // Channels ChoiceBox
         channelList = new ChoiceBox<>();
-        channelList.setOnAction(e -> {
-            //currentChannelName =  channelList.getValue();
-            clientUserActor.tell(new GUIMessage("/to "+channelList.getValue()) , clientUserActor);
-        });
+        channelList.setOnAction(e -> clientUserActor.tell(new GUIMessage("/to "+channelList.getValue()) , clientUserActor));
 
         HBox bottomHBox = new HBox();
         HBox.setHgrow(chatInput, Priority.ALWAYS);
@@ -144,6 +136,8 @@ public class ChatWindow extends Application{
         stage.setScene(chatScene);
         stage.show();
     }
+
+
 
     private void paintErrorWindow(String message) {
         Label label = new Label(message);
@@ -161,8 +155,31 @@ public class ChatWindow extends Application{
         System.out.println("$ [" + LocalTime.now().toString() + "] Sent: " +text);
     }
 
+    public Text userNameToText(String userName){
+        Text textUserName = null;
+        if(userName.startsWith("$")){
+            textUserName = new Text("@"+userName.substring(1));
+            textUserName.setFont(ITALIC_FONT);
+        } else{
+            textUserName = new Text(userName);
+        }
+        return textUserName;
+    }
+
     protected void printText(String text) {
-        Platform.runLater(() -> this.chatBox.appendText(text+"\n"));
+        Platform.runLater(() -> this.chatBox.getItems().add(new TextFlow(new Text(text))));    //appendText(text+"\n"));
+    }
+
+    protected void printText(TextFlow text) {
+        Platform.runLater(() -> this.chatBox.getItems().add(text));       //(text+"\n"));
+    }
+
+    public void printAlert(String time, String userName, String action){
+        printText(new TextFlow(new Text(time),new Text("*** "),new Text(action),new Text(": "),userNameToText(userName)));
+    }
+
+    public void printThisByThat(String time,String to,String action,String by){
+        printText(new TextFlow(new Text(time), new Text("*** "),userNameToText(to),new Text(" "),new Text(action),new Text(" by "),userNameToText(by)));
     }
 
     protected  void invalidSyntax(String text){
@@ -170,30 +187,28 @@ public class ChatWindow extends Application{
     }
 
     public void setTitle(String title) {
-        Platform.runLater(() -> this.stage.setTitle(title));
-    }
-
-    public void setChatBox(String text) {
-        Platform.runLater(() ->{
-            chatBox.clear();
-            chatBox.appendText(text);
-        });
+        Platform.runLater(() -> chatTitle.setText(title));
     }
 
     public void addUser(String userName){
-        Platform.runLater(() -> this.userList.getItems().add(userName));
+        Platform.runLater(() -> this.userList.getItems().add(userNameToText(userName)));
     }
 
     public void removeUser(String userName){
-        Platform.runLater(() -> this.userList.getItems().remove(userName));
+        Platform.runLater(() -> this.userList.getItems().remove(userNameToText(userName)));
+    }
+
+    public void switchChannel(String channelName){
+        clearContext("ChannelName: "+channelName);
+        currentChannelName = channelName;
+
+        clientUserActor.tell(new GetContentMessage(userName,channelName),clientUserActor);
     }
 
     public void addChannel(String channelName){ //TODO add title
-        clearContext();
         Platform.runLater(() ->
-            channelList.getItems().add(channelName));
-        currentChannelName = channelName;
-        setTitle("UserName: "+userName+", ChannelName: "+channelName);
+                channelList.getItems().add(channelName));
+       switchChannel(channelName);
     }
 
     public void removeChannel(String channelName){
@@ -204,17 +219,21 @@ public class ChatWindow extends Application{
     }
 
     public void clearContext(){
+        clearContext();
+    }
+
+    public void clearContext(String title){
         Platform.runLater(() -> {
             currentChannelName = null;
-            setTitle("User: " + userName);
+            setTitle(title);
             userList.getItems().clear();
-            chatBox.clear();
+            chatBox.getItems().clear();
         });
     }
 
     private void login(String userName, String serverName, String port) {// TODO: add server add Error support
         if(userName.startsWith("+") || userName.startsWith("@") || userName.startsWith("$")){
-           paintErrorWindow("User name can not start with +, @ or $\ntry another name");
+           paintErrorWindow("User name cannot start with +, @ or $\ntry another name");
            return;
         }
         try {
@@ -223,16 +242,19 @@ public class ChatWindow extends Application{
             ConfigFactory.invalidateCaches();
             ///Config actualConfig = configWithPort.withFallback(ConfigFactory.load());
             system = ActorSystem.create("IRCClient", configWithPort);
-            //system.actorOf(Props.create(Main.Terminator.class, a), "terminator");
+
             clientUserActor = system.actorOf(Props.create(ClientUserActor.class, userName,serverName, this), "ClientUserActor");
+            system.actorOf(Props.create(Main.Terminator.class, clientUserActor), "terminator");
             paintChatWindow();
-        }catch (ChannelException ex){
-            paintErrorWindow("Could not coonect with the given Server and IP\n " +
-                    "make sure that you are using a vlid server name/IP and try a new port");
+        }catch (Exception ex){
+            paintErrorWindow("Could not connect with the given Server and IP\n " +
+                    "make sure that you are using a valid server name/IP and try a new port");
         }
     }
 
-    public void doExit(){
+    private void doExit(WindowEvent windowEvent) {
+        System.out.println("$$$ Closing Client!");
         clientUserActor.tell(new ExitMessage(),clientUserActor);
     }
+
 }

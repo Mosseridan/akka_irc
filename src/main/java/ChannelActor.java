@@ -3,7 +3,6 @@ import akka.actor.AbstractActor;
 import akka.actor.Terminated;
 import akka.routing.ActorRefRoutee;
 import akka.routing.BroadcastRoutingLogic;
-import akka.routing.Routee;
 import akka.routing.Router;
 
 public class ChannelActor extends AbstractActor {
@@ -26,8 +25,8 @@ public class ChannelActor extends AbstractActor {
             .match(LeaveMessage.class, this::receiveLeave)
             // ChangeTitleMessage
             .match(ChangeTitleMessage.class, this::receiveChangeTitle)
-            // GetAllUserNamesMessage
-            .match(GetAllUserNamesMessage.class, this::receiveGetAllUserNames)
+            // GetContentMessage
+            .match(GetContentMessage.class, this::receiveGetContent)
             /** INCOMING MESSAGES **/
             // JoinMessage
             .match(JoinMessage.class, this::receiveJoin)
@@ -76,10 +75,12 @@ public class ChannelActor extends AbstractActor {
     private void receiveChangeTitle(ChangeTitleMessage msg) {
         title = msg.getTitle();
         router.route(new AnnouncementMessage(msg.getChannelName(),msg.getSenderName()+" changed the channel title changed to " + title),getSender());
+        router.route(new TitleChangedMessage(msg.getChannelName(),msg.getTitle()),getSender());
     }
 
-    // GetAllUserNamesMessage
-    private void  receiveGetAllUserNames(GetAllUserNamesMessage msg) {
+    // GetContentMessage
+    private void  receiveGetContent(GetContentMessage msg) {
+        getSender().tell(new TitleChangedMessage(channelName,title),getSelf());
         router.route(new GetUserNameMessage(msg.getSenderName(),channelName),getSender());
     }
 

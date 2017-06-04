@@ -9,8 +9,8 @@ public class Main {
     system.actorOf(Props.create(Terminator.class, a), "terminator");
     */
     ActorSystem system = ActorSystem.create("IRC");
-    ActorRef a = system.actorOf(Props.create(ServerActor.class), "Server");
-    system.actorOf(Props.create(Terminator.class, a), "terminator");
+    ActorRef serverActor = system.actorOf(Props.create(ServerActor.class), "Server");
+    system.actorOf(Props.create(Terminator.class, serverActor), "terminator");
 
   }
 

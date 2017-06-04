@@ -1,9 +1,24 @@
 package Shared.Messages;
 
-public class GetContentMessage extends Message{
-   public String channel;
+public class GetAllUserNamesMessage extends Message {
+    private String senderName;
+    private String channelName;
 
-    public GetContentMessage(String channel){
-        this.channel = channel;
+    public GetAllUserNamesMessage(String senderName,String channelName){
+        this.senderName = senderName;
+        this.channelName = channelName;
+    }
+
+    public String getSenderName(){
+        return senderName;
+    }
+
+    public String getChannelName(){
+        return channelName;
+    }
+
+    @Override
+    public String toString(){
+        return("GetAllUserNamesMessage(senderName: "+senderName+", channelName: "+channelName+")");
     }
 }

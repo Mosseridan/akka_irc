@@ -4,7 +4,7 @@ public class ErrorMessage extends Message{
     private String message;
 
     public ErrorMessage(String action, String reason){
-        this.message = "*** Error: Could not " + action + ". " + reason + ".";
+        this.message = "*** Could not " + action + ". " + reason + ".";
     }
 
     public ErrorMessage(String action){

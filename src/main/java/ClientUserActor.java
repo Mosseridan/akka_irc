@@ -2,6 +2,8 @@ import Shared.Messages.*;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class ClientUserActor extends AbstractActor {
     String userName;
@@ -58,6 +60,10 @@ public class ClientUserActor extends AbstractActor {
             .match(AddUserNameMessage.class, this::receiveAddUserName)
             // ChangeUserNameMessage
             .match(ChangeUserNameMessage.class, this::receiveChangeUserName)
+            // GetContentMessage
+            .match(GetContentMessage.class, msg->serverUserActor.tell(msg,getSelf()))
+            //TitleChangedMessage
+            .match(TitleChangedMessage.class, this::receiveTitleChaged)
             // ExitMessage
             .match(ExitMessage.class, this::receiveExit)
             // For any unhandled message
@@ -69,13 +75,13 @@ public class ClientUserActor extends AbstractActor {
     // IncomingPrivateMessage
     private void receiveIncomingPrivate(IncomingPrivateMessage msg) {
         //TODO: ADD NEW WINDOW SUPPORT!
-        chatWindow.printText(msg.getTime()+"~PM~ <"+msg.getSenderName()+"> "+msg.getMessage());
+        chatWindow.printText(new TextFlow(new Text(msg.getTime()+"~PM~ <"),chatWindow.userNameToText(msg.getSenderName()),new Text("> "+msg.getMessage())));
     }
 
     // IncomingBroadcastMessage
     private void receiveIncomingBroadcast(IncomingBroadcastMessage msg) {
         if(msg.getChannelName().equals(currentChannelName)) {
-            chatWindow.printText(msg.getTime()+"<"+msg.getSenderName()+"> "+msg.getMessage());
+            chatWindow.printText(new TextFlow(new Text(msg.getTime()+"<"),chatWindow.userNameToText(msg.getSenderName()),new Text("> "+msg.getMessage())));
         }
     }
 
@@ -105,15 +111,15 @@ public class ClientUserActor extends AbstractActor {
     private void receiveJoinApproval(JoinApprovalMessage msg) { //TODO add title
         currentChannelName = msg.getChannelName();
         chatWindow.addChannel(msg.getChannelName());
-        serverUserActor.tell(new GetAllUserNamesMessage(userName,currentChannelName),getSelf());
-        chatWindow.printText(msg.getTime()+"*** joins: "+msg.getUserName());
-        chatWindow.setTitle("UserName: "+userName+", ChannelName: "+msg.getChannelName());
+        //serverUserActor.tell(new GetContentMessage(userName,currentChannelName),getSelf());
+        chatWindow.printAlert(msg.getTime(),msg.getUserName(),"joins");
+        //chatWindow.setTitle("UserName: "+userName+", ChannelName: "+msg.getChannelName());
     }
 
     // UserJoinedMessage
     private void receiveUserJoined(UserJoinedMessage msg) {
         if(msg.getChannelName().equals(currentChannelName)) {
-            chatWindow.printText(msg.getTime() + "*** joins: " + msg.getUserName());
+            chatWindow.printAlert(msg.getTime(),msg.getUserName(),"joins");
             chatWindow.addUser(msg.getUserName());
         }
     }
@@ -121,7 +127,7 @@ public class ClientUserActor extends AbstractActor {
     // UserLeftMessage
     private void receiveUserLeft(UserLeftMessage msg) {
         if(msg.getChannelName().equals(currentChannelName)) {
-            chatWindow.printText(msg.getTime() + "*** parts: " + msg.getUserName());
+            chatWindow.printAlert(msg.getTime(),msg.getUserName(),"parts");
             chatWindow.removeUser(msg.getUserName());
         }
     }
@@ -129,7 +135,7 @@ public class ClientUserActor extends AbstractActor {
     // IncomingKillChannelMessage
     private void receiveIncomingKillChannel(IncomingKillChannelMessage msg){
         if(msg.getChannelName().equals(currentChannelName)) {
-            chatWindow.printText(msg.getTime() + "*** channel "+msg.getChannelName()+" was disband by "+msg.getSenderName());
+            chatWindow.printThisByThat(msg.getTime(),"channel "+msg.getChannelName(),"was disband",msg.getSenderName());
             currentChannelName = null;
         }
         chatWindow.removeChannel(msg.getChannelName());
@@ -138,7 +144,7 @@ public class ClientUserActor extends AbstractActor {
     // IncomingKickMessage
     private void receiveIncomingKick(IncomingKickMessage msg){
         if(msg.getChannelName().equals(currentChannelName)){
-            chatWindow.printText(msg.getTime()+"*** " + msg.getUserName() + " kicked by " + msg.getSenderName());
+            chatWindow.printThisByThat(msg.getTime(),msg.getUserName(),"kicked",msg.getSenderName());
             currentChannelName = null;
         }
         chatWindow.removeChannel(msg.getChannelName());
@@ -146,8 +152,9 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingBanMessage
     private void receiveIncomingBan(IncomingBanMessage msg){
+        chatWindow.clearContext();
         if(msg.getChannelName().equals(currentChannelName)){
-            chatWindow.printText("*** " + msg.getUserName() + " banned by " + msg.getSenderName());
+            chatWindow.printThisByThat(msg.getTime(),msg.getUserName(),"banned",msg.getSenderName());
             currentChannelName = null;
         }
         chatWindow.removeChannel(msg.getChannelName());
@@ -168,10 +175,17 @@ public class ClientUserActor extends AbstractActor {
         }
     }
 
+    // TitleChangedMessage
+    private void receiveTitleChaged(TitleChangedMessage msg){
+        if(msg.getChannelName().equals(currentChannelName) && msg.getTitle() != null)
+            chatWindow.setTitle("ChannelName: "+msg.getChannelName()+"    Title: "+msg.getTitle());
+    }
+
     // ExitMessage
     private void receiveExit(ExitMessage msg){
-        serverUserActor.tell(msg,getSelf());
-       getContext().stop(getSelf());
+        //serverUserActor.tell(msg,getSelf());
+        System.out.println("$$$ in clientUserActor userName: "+userName+" closing client");
+        getContext().stop(getSelf());
     }
 
     // GUIMessage
@@ -201,15 +215,27 @@ public class ClientUserActor extends AbstractActor {
                 serverUserActor.tell(new LeaveMessage(userName, cmdArr[1]), getSelf());
                 break;
             case "/title":
+                if(cmdArr[1].equals(userName)){
+                    chatWindow.printText(msg.getTime()+"*** kick your self");
+                    break;
+                }
                 serverUserActor.tell(new ChangeTitleMessage(userName, cmdArr[1], cmdArr[2]), getSelf());
                 break;
             case "/kick":
                 serverUserActor.tell(new OutgoingKickMessage(cmdArr[1], userName, cmdArr[2]), getSelf());
                 break;
             case "/ban":
+                if(cmdArr[1].equals(userName)){
+                    chatWindow.printText(msg.getTime()+"*** Could not ban yourself");
+                    break;
+                }
                 serverUserActor.tell(new OutgoingBanMessage(cmdArr[1], userName, cmdArr[2]), getSelf());
                 break;
             case "/add":
+                if(cmdArr[1].equals(userName)){
+                    chatWindow.printText(msg.getTime()+"*** add rights to your self");
+                    break;
+                }
                 switch (cmdArr[2]) {
                     case "v":
                         serverUserActor.tell(new OutgoingAddVoicedMessage(cmdArr[3], userName, cmdArr[1]), getSelf());
@@ -222,7 +248,12 @@ public class ClientUserActor extends AbstractActor {
                 }
                 break;
             case "/remove":
+                if(cmdArr[1].equals(userName)){
+                    chatWindow.printText(msg.getTime()+"*** remove rights from your self");
+                    break;
+                }
                 switch (cmdArr[2]) {
+
                     case "v":
                         serverUserActor.tell(new OutgoingRemoveVoicedMessage(cmdArr[3], userName, cmdArr[1]), getSelf());
                         break;
@@ -242,12 +273,12 @@ public class ClientUserActor extends AbstractActor {
                 ActorRef serverUserChannelActor = HelperFunctions.getActorRefBySelection(sel);
 
                 if(serverUserChannelActor == null){
-                    chatWindow.printText(msg.getTime()+ "*** Error: Could not switch to channel "+cmdArr[1]+"you are not in this channel.");
+                    chatWindow.printText(msg.getTime()+ "*** Could not switch to channel "+cmdArr[1]+"you are not in this channel.");
                 } else {
-                    chatWindow.clearContext();
-                    chatWindow.currentChannelName = cmdArr[1];
                     currentChannelName = cmdArr[1];
-                    serverUserChannelActor.tell(new GetAllUserNamesMessage(userName,cmdArr[1]),getSelf());
+                    chatWindow.switchChannel(cmdArr[1]);
+                    if(cmdArr.length > 2)
+                        serverUserActor.tell(new OutgoingBroadcastMessage(userName, cmdArr[1], text.split(cmdArr[1], 2)[1]), getSelf());
                 }
                 break;
             default:
@@ -256,7 +287,7 @@ public class ClientUserActor extends AbstractActor {
     }
 
     boolean verifyFormat(String[] cmdArr) {
-        if (cmdArr.length == 2 && (cmdArr[0].equals("/join") || cmdArr[0].equals("/leave") || cmdArr[0].equals("/disband"))) {
+        if (cmdArr.length == 2 && (cmdArr[0].equals("/join") || cmdArr[0].equals("/leave") || cmdArr[0].equals("/disband") || cmdArr[0].equals("/to"))) {
             return true;
         } else if (cmdArr.length == 3 && (cmdArr[0].equals("/kick") || cmdArr[0].equals("/ban") || cmdArr[0].equals("/title"))) {
             return true;
@@ -275,4 +306,5 @@ public class ClientUserActor extends AbstractActor {
     private void receiveUnhandled(Object o) {
         getSender().tell(new ErrorMessage("Send "+o.toString(),"This message is invalid in the current getContext"),getSelf());
     }
+
 }
