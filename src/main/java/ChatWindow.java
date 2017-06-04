@@ -98,7 +98,7 @@ public class ChatWindow extends Application{
         borderPane.setPadding(new Insets(20, 20, 20, 20));
 
         // Chat Label
-        chatTitle =  new Label("UserName: "+userName);
+        chatTitle =  new Label();
         borderPane.setTop(chatTitle);
 
         // Chat Box
@@ -119,7 +119,10 @@ public class ChatWindow extends Application{
         });
 
         sendButton = new Button("Send");
-        sendButton.setOnAction(e -> sendInput(chatInput.getText()));
+        sendButton.setOnAction(e -> {
+            sendInput(chatInput.getText());
+            chatInput.clear();
+        });
 
 
         // Channels ChoiceBox
@@ -136,8 +139,6 @@ public class ChatWindow extends Application{
         stage.setScene(chatScene);
         stage.show();
     }
-
-
 
     private void paintErrorWindow(String message) {
         Label label = new Label(message);

@@ -74,7 +74,6 @@ public class ClientUserActor extends AbstractActor {
 
     // IncomingPrivateMessage
     private void receiveIncomingPrivate(IncomingPrivateMessage msg) {
-        //TODO: ADD NEW WINDOW SUPPORT!
         chatWindow.printText(new TextFlow(new Text(msg.getTime()+"~PM~ <"),chatWindow.userNameToText(msg.getSenderName()),new Text("> "+msg.getMessage())));
     }
 
